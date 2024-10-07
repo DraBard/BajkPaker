@@ -1,0 +1,2 @@
+database:
+  url: mysql+asyncmy://root:Bartek11@localhost/bajkpaker

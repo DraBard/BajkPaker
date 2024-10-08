@@ -1,28 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from './api';
-
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import HomePage from './components/HomePage';
+import ShopPage from './components/ShopPage';
+import AboutPage from './components/AboutPage';
+import ContactPage from './components/ContactPage';
 
 function App() {
-  const [bikes, setBikes] = useState([]);
-
-  useEffect(() => {
-    axios.get(`${API_BASE_URL}/api/bikes`).then(response => {
-      setBikes(response.data);
-    }).catch(error => {
-      console.error('There was an error fetching the bikes!', error);
-    });
-  }, []);
-
   return (
-    <div>
-      <h1>Custom Bikes Shop</h1>
-      <ul>
-        {bikes.map(bike => (
-          <li key={bike.id}>{bike.name} - ${bike.price}</li>
-        ))}
-      </ul>
-    </div>
+    <Router>
+      <Header />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/shop" element={<ShopPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+      </Routes>
+      <Footer />
+    </Router>
   );
 }
 

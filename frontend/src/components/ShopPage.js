@@ -5,7 +5,7 @@ import { fetchBikes } from '../api';
 
 const ShopContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
   gap: 20px;
   padding: 20px;
 `;
@@ -57,16 +57,18 @@ const ShopPage = () => {
 
   return (
     <ShopContainer>
-      {bikes.map(bike => (
-        <Link to={`/shop/${bike.id}`} key={bike.id}>
-          <ProductCard>
-            <img src={bike.image_url} alt={bike.name} />
-            <h3>{bike.name}</h3>
-            <p>{bike.description}</p>
-            <p>${bike.price}</p>
-          </ProductCard>
-        </Link>
-      ))}
+      {bikes.map(bike => {
+        const mainImage = bike.images.find(image => image.is_main);
+        return (
+          <Link to={`/shop/${bike.id}`} key={bike.id}>
+            <ProductCard>
+              <img src={mainImage ? `http://localhost:8000${mainImage.image_url}` : '/path/to/default-image.jpg'} alt={bike.name} />
+              <h3>{bike.name}</h3>
+              <p>${bike.price}</p>
+            </ProductCard>
+          </Link>
+        );
+      })}
     </ShopContainer>
   );
 };

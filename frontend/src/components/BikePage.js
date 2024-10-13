@@ -4,14 +4,18 @@ import styled from 'styled-components';
 import { fetchBike } from '../api';
 
 const BikeContainer = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
   padding: 20px;
   text-align: center;
 `;
 
 const BikeImage = styled.img`
-  max-width: 100%;
+  width: 100%;
   height: auto;
-  cursor: zoom-in;
+  margin: 10px 0;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const BikePage = () => {
@@ -41,7 +45,7 @@ const BikePage = () => {
       <p>{bike.description}</p>
       <p>${bike.price}</p>
       {bike.images.map((image) => (
-        <BikeImage key={image.id} src={image.image_url} alt={bike.name} />
+        <BikeImage key={image.id} src={`http://localhost:8000${image.image_url}`} alt={bike.name} />
       ))}
     </BikeContainer>
   );

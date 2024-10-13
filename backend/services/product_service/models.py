@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -9,7 +9,6 @@ class Bike(Base):
     name = Column(String(255), nullable=False)
     price = Column(Integer, nullable=False)
     description = Column(String(2000), nullable=True)
-    image_url = Column(String(500), nullable=True)
     images = relationship("BikeImage", back_populates="bike")
 
 class BikeImage(Base):
@@ -17,4 +16,5 @@ class BikeImage(Base):
     id = Column(Integer, primary_key=True)
     bike_id = Column(Integer, ForeignKey('bikes.id'), nullable=False)
     image_url = Column(String(500), nullable=False)
+    is_main = Column(Boolean, default=False)
     bike = relationship("Bike", back_populates="images")

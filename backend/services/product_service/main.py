@@ -2,8 +2,13 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import router as product_router
+from fastapi.staticfiles import StaticFiles
+import os
 
 app = FastAPI()
+
+# Serve static files from the "backend/services/product_service/images" directory
+app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
 
 app.add_middleware(
     CORSMiddleware,

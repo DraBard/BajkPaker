@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from sqlalchemy.future import select 
 from sqlalchemy.orm import selectinload
 from models import Bike, BikeImage
 from schemas import BikeCreate, BikeOut
@@ -25,11 +25,17 @@ async def read_bike(bike_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Bike not found")
     return bike
 
-@router.post("/api/bikes", response_model=BikeCreate)
+@router.post("/api/bikes", response_model=BikeOut)
 async def create_bike(bike: BikeCreate, db: AsyncSession = Depends(get_db)):
-    new_bike = Bike(name=bike.name, price=bike.price, description=bike.description, image_url=bike.image_url)
+    new_bike = Bike(name=bike.name, price=bike.price, description=bike.description)
     db.add(new_bike)
     await db.commit()
     await db.refresh(new_bike)
+
+    for image in bike.images:
+        new_image = BikeImage(bike_id=new_bike.id, image_url=image.image_url, is_main=image.is_main)
+        db.add(new_image)
+    await db.commit()
+
     return new_bike
 

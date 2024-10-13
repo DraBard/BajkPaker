@@ -4,15 +4,16 @@ import styled from 'styled-components';
 const FooterContainer = styled.footer`
   background-color: #333;
   color: #fff;
-  padding: 20px;
   text-align: center;
-  font-family: 'Roboto', sans-serif;
+  padding: 20px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
 `;
 
 const Footer = () => (
   <FooterContainer>
-    <p>Follow us on social media!</p>
-    <p>Newsletter Signup Placeholder</p>
+    <p>&copy; {new Date().getFullYear()} BajkPaker. All rights reserved.</p>
   </FooterContainer>
 );
 

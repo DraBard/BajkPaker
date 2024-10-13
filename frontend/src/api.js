@@ -11,3 +11,13 @@ export const fetchBikes = async () => {
     throw error;
   }
 };
+
+export const fetchBike = async (bikeId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/bikes/${bikeId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching bike:', error);
+    throw error;
+  }
+};

@@ -1,32 +1,21 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const HeroSection = styled.section`
-  background: url('/path/to/placeholder-image.jpg') no-repeat center center;
-  background-size: cover;
-  height: 300px;
+const HomeContainer = styled.div`
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  color: #fff;
-  font-family: 'Permanent Marker', cursive;
-  font-size: 2em;
-`;
-
-const Introduction = styled.div`
+  justify-content: center;
+  height: 80vh;
+  text-align: center;
   padding: 20px;
-  font-family: 'Roboto', sans-serif;
 `;
 
 const HomePage = () => (
-  <>
-    <HeroSection>
-      <h1>Ride in Style</h1>
-    </HeroSection>
-    <Introduction>
-      <p>Welcome to Custom Bikes Shop, where we build bikes that match your style and personality.</p>
-    </Introduction>
-  </>
+  <HomeContainer>
+    <h1>Welcome to BajkPaker</h1>
+    <p>Your one-stop shop for custom bikes and accessories.</p>
+  </HomeContainer>
 );
 
 export default HomePage;

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import { fetchBikes } from '../api';
 
 const ShopContainer = styled.div`
@@ -15,6 +16,27 @@ const ProductCard = styled.div`
   border-radius: 5px;
   padding: 10px;
   text-align: center;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+  }
+
+  h3 {
+    font-size: 1.2em;
+    margin: 10px 0;
+  }
+
+  p {
+    margin: 5px 0;
+  }
 `;
 
 const ShopPage = () => {
@@ -36,12 +58,14 @@ const ShopPage = () => {
   return (
     <ShopContainer>
       {bikes.map(bike => (
-        <ProductCard key={bike.id}>
-          <img src="/path/to/placeholder-image.jpg" alt={bike.name} />
-          <h3>{bike.name}</h3>
-          <p>{bike.description}</p>
-          <p>${bike.price}</p>
-        </ProductCard>
+        <Link to={`/shop/${bike.id}`} key={bike.id}>
+          <ProductCard>
+            <img src={bike.image_url} alt={bike.name} />
+            <h3>{bike.name}</h3>
+            <p>{bike.description}</p>
+            <p>${bike.price}</p>
+          </ProductCard>
+        </Link>
       ))}
     </ShopContainer>
   );

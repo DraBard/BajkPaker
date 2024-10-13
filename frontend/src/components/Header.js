@@ -16,12 +16,16 @@ const NavLinks = styled.div`
     margin: 0 10px;
     text-decoration: none;
     font-family: 'Permanent Marker', cursive;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 `;
 
 const Header = () => (
   <NavBar>
-    <h1>Custom Bikes Shop</h1>
+    <h1>BajkPaker</h1>
     <NavLinks>
       <Link to="/">Home</Link>
       <Link to="/shop">Shop</Link>

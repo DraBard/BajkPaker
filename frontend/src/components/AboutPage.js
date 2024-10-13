@@ -3,14 +3,13 @@ import styled from 'styled-components';
 
 const AboutContainer = styled.div`
   padding: 20px;
-  font-family: 'Roboto', sans-serif;
+  text-align: center;
 `;
 
 const AboutPage = () => (
   <AboutContainer>
-    <h2>About Us</h2>
-    <p>Our story began in a small garage...</p>
-    {/* Add more content as needed */}
+    <h1>About Us</h1>
+    <p>We are passionate about custom bikes and providing the best service to our customers.</p>
   </AboutContainer>
 );
 

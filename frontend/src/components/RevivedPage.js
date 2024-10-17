@@ -1,9 +1,10 @@
+// frontend/src/components/RevivedPage.js
+
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
 import { fetchBikes } from '../api';
 
-const ShopContainer = styled.div`
+const RevivedContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
   gap: 20px;
@@ -39,14 +40,16 @@ const ProductCard = styled.div`
   }
 `;
 
-const ShopPage = () => {
-  const [bikes, setBikes] = useState([]);
+const RevivedPage = () => {
+  const [bike, setBike] = useState(null);
 
   useEffect(() => {
     const getBikes = async () => {
       try {
         const data = await fetchBikes();
-        setBikes(data);
+        if (data.length > 0) {
+          setBike(data[0]);
+        }
       } catch (error) {
         console.error('Failed to fetch bikes:', error);
       }
@@ -55,26 +58,21 @@ const ShopPage = () => {
     getBikes();
   }, []);
 
-  if (bikes.length === 0) {
-    return <p>No bikes available for purchase.</p>;
+  if (!bike) {
+    return <p>No bike available in the revived section.</p>;
   }
 
+  const mainImage = bike.images.find(image => image.is_main);
+
   return (
-    <ShopContainer>
-      {bikes.map((bike) => {
-        const mainImage = bike.images.find(image => image.is_main);
-        return (
-          <Link to={`/shop/${bike.id}`} key={bike.id}>
-            <ProductCard>
-              <img src={mainImage ? `http://localhost:8000${mainImage.image_url}` : '/path/to/default-image.jpg'} alt={bike.name} />
-              <h3>{bike.name}</h3>
-              <p>${bike.price}</p>
-            </ProductCard>
-          </Link>
-        );
-      })}
-    </ShopContainer>
+    <RevivedContainer>
+      <ProductCard>
+        <img src={mainImage ? `http://localhost:8000${mainImage.image_url}` : '/path/to/default-image.jpg'} alt={bike.name} />
+        <h3>{bike.name}</h3>
+        <p>${bike.price}</p>
+      </ProductCard>
+    </RevivedContainer>
   );
 };
 
-export default ShopPage;
+export default RevivedPage;

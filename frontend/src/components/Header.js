@@ -23,9 +23,20 @@ const NavLinks = styled.div`
   }
 `;
 
+const Logo = styled(Link)`
+  color: #fff;
+  font-size: 1.5em;
+  text-decoration: none;
+  font-family: 'Permanent Marker', cursive;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 const Header = () => (
   <NavBar>
-    <h1>BajkPaker</h1>
+    <Logo to="/">BajkPaker</Logo>
     <NavLinks>
       <Link to="/">Home</Link>
       <Link to="/shop">Shop</Link>

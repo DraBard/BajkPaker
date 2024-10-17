@@ -1,35 +1,51 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { fetchBike } from '../api';
 import bikeStyles from '../bikeStyles';
+import { CartContext } from '../CartContext';
 
 const BikeContainer = styled.div`
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: ${(props) => props.theme.spacing.medium};
   text-align: center;
-  background-color: ${(props) => props.backgroundColor || '#fff'};
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: ${(props) => props.backgroundColor || props.theme.colors.light};
+  border-radius: ${(props) => props.theme.borderRadius};
+  box-shadow: ${(props) => props.theme.boxShadow};
 `;
 
 const BikeImage = styled.img`
   width: 100%;
   height: auto;
-  margin: 10px 0;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: ${(props) => props.theme.spacing.small} 0;
+  border-radius: ${(props) => props.theme.borderRadius};
+  box-shadow: ${(props) => props.theme.boxShadow};
 `;
 
 const Description = styled.p`
   font-style: italic;
-  color: ${(props) => props.color || '#333'};
+  color: ${(props) => props.color || props.theme.colors.text};
+`;
+
+const AddToCartButton = styled.button`
+  background-color: ${(props) => props.theme.colors.primary};
+  color: #fff;
+  border: none;
+  padding: ${(props) => props.theme.spacing.small};
+  border-radius: ${(props) => props.theme.borderRadius};
+  cursor: pointer;
+  margin-top: ${(props) => props.theme.spacing.medium};
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.secondary};
+  }
 `;
 
 const BikePage = () => {
   const { bikeId } = useParams();
   const [bike, setBike] = useState(null);
+  const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
     const getBike = async () => {
@@ -63,6 +79,7 @@ const BikePage = () => {
       {bike.images.map((image) => (
         <BikeImage key={image.id} src={`http://localhost:8000${image.image_url}`} alt={bike.name} />
       ))}
+      <AddToCartButton onClick={() => addToCart(bike)}>Add to Cart</AddToCartButton>
     </BikeContainer>
   );
 };

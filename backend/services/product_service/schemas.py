@@ -1,5 +1,6 @@
 # schemas.py (Pydantic Model)
 from pydantic import BaseModel
+from typing import List, Optional
 
 class BikeImage(BaseModel):
     id: int
@@ -13,15 +14,15 @@ class BikeImage(BaseModel):
 class BikeCreate(BaseModel):
     name: str
     price: float
-    description: str | None = None
-    images: list[BikeImage] = []
+    description: Optional[str] = None
+    images: List[BikeImage] = []
 
 class BikeOut(BaseModel):
     id: int
     name: str
     price: float
-    description: str | None = None
-    images: list[BikeImage] = []
+    description: Optional[str] = None
+    images: List[BikeImage] = []
 
     class Config:
         orm_mode = True

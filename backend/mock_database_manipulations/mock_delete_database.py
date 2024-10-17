@@ -13,24 +13,29 @@ def load_config(file_path):
 
 config_path = Path(__file__).resolve().parents[2] / 'config.yaml'
 config = load_config(config_path)
-DATABASE_URL = config["DATABASE_URL"]
+DATABASE_URL_PRODUCT = config["database_product_dev"]["url"]
+DATABASE_URL_ORDER = config["database_order_dev"]["url"]
 
-# Create async engine and session
-engine = create_async_engine(DATABASE_URL, echo=True)
-AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+# Create async engines and sessions
+engine_product = create_async_engine(DATABASE_URL_PRODUCT, echo=True)
+AsyncSessionLocalProduct = sessionmaker(engine_product, class_=AsyncSession, expire_on_commit=False)
+
+engine_order = create_async_engine(DATABASE_URL_ORDER, echo=True)
+AsyncSessionLocalOrder = sessionmaker(engine_order, class_=AsyncSession, expire_on_commit=False)
 
 # Declarative Base
 Base = declarative_base()
 
-# Function to drop all tables
-async def drop_all_tables():
+# Function to drop all tables in a given engine
+async def drop_all_tables(engine):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
-        print("All tables dropped")
+        print(f"All tables dropped in {engine.url.database}")
 
-# Main function to run the drop tables script
+# Main function to run the drop tables script for both databases
 async def main():
-    await drop_all_tables()
+    await drop_all_tables(engine_product)
+    await drop_all_tables(engine_order)
 
 # Running the script
 if __name__ == "__main__":

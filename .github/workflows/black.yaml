@@ -19,11 +19,17 @@ jobs:
         run: |
           git diff --exit-code || echo "Code has been formatted."
 
-      # Step 4: Commit and push the changes back to the repository if needed
-      - name: Commit and push changes
+      # Step 4: Set up Git to use the GITHUB_TOKEN for authentication
+      - name: Setup Git for pushing changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Step 5: Commit and push changes back to the repository if needed
+      - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the automatically provided GitHub token
+        run: |
           git add .
           git commit -m "Apply Black code formatting" || echo "No changes to commit."
           git push

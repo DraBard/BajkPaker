@@ -3,6 +3,7 @@
 from pydantic import BaseModel
 from typing import List
 
+
 class BikeOut(BaseModel):
     id: int
     name: str
@@ -12,9 +13,11 @@ class BikeOut(BaseModel):
     class Config:
         orm_mode = True
 
+
 class CartItemCreate(BaseModel):
     bike_id: int
     quantity: int
+
 
 class CartItemOut(BaseModel):
     id: int
@@ -25,13 +28,16 @@ class CartItemOut(BaseModel):
     class Config:
         orm_mode = True
 
+
 class OrderItemCreate(BaseModel):
     bike_id: int
     quantity: int
 
+
 class OrderCreate(BaseModel):
     total_price: float
     items: List[OrderItemCreate]
+
 
 class OrderItemOut(BaseModel):
     id: int
@@ -41,6 +47,7 @@ class OrderItemOut(BaseModel):
 
     class Config:
         orm_mode = True
+
 
 class OrderOut(BaseModel):
     id: int

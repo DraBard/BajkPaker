@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship, declarative_base
 
 Base = declarative_base()
 
+
 class Bike(Base):
     __tablename__ = "bikes"
     id = Column(Integer, primary_key=True)
@@ -12,6 +13,7 @@ class Bike(Base):
     bought = Column(Boolean, default=False)
     images = relationship("BikeImage", back_populates="bike")
 
+
 class BikeImage(Base):
     __tablename__ = "bike_images"
     id = Column(Integer, primary_key=True)
@@ -19,4 +21,3 @@ class BikeImage(Base):
     image_url = Column(String(255), nullable=False)
     is_main = Column(Boolean, default=False)
     bike = relationship("Bike", back_populates="images")
-

@@ -8,7 +8,11 @@ import os
 app = FastAPI()
 
 # Serve static files from the "backend/services/product_service/images" directory
-app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
+app.mount(
+    "/static",
+    StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")),
+    name="static",
+)
 
 app.add_middleware(
     CORSMiddleware,

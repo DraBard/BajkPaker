@@ -6,7 +6,30 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
+      # Step 1: Checkout the code from the repository
       - uses: actions/checkout@v4
+
+      # Step 2: Run Black to automatically format the code
       - uses: psf/black@stable
         with:
           options: "--quiet"
+
+      # Step 3: Check if there are any changes after Black has run
+      - name: Check for changes
+        run: |
+          git diff --exit-code || echo "Code has been formatted."
+
+      # Step 4: Set up Git to use the GITHUB_TOKEN for authentication
+      - name: Setup Git for pushing changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Step 5: Commit and push changes back to the repository if needed
+      - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the automatically provided GitHub token
+        run: |
+          git add .
+          git commit -m "Apply Black code formatting" || echo "No changes to commit."
+          git push

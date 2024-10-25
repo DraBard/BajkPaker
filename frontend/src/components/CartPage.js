@@ -36,7 +36,7 @@ const RemoveButton = styled.button`
 `;
 
 const CartPage = () => {
-  const { cart, setCart, removeFromCart } = useContext(CartContext);
+  const { cart, removeFromCart } = useContext(CartContext);
 
   useEffect(() => {
     const getCart = async () => {
@@ -49,7 +49,7 @@ const CartPage = () => {
     };
 
     getCart();
-  }, [setCart]);
+  }, []);
 
   const totalPrice = cart.reduce((total, item) => total + item.bike.price * item.quantity, 0);
 
@@ -63,7 +63,7 @@ const CartPage = () => {
             <p>Quantity: {item.quantity}</p>
             <p>Price: ${item.bike.price}</p>
           </div>
-          <RemoveButton onClick={() => removeFromCart(item.bike_id)}>Remove</RemoveButton>
+          <RemoveButton onClick={() => removeFromCart(item.id)}>Remove</RemoveButton>
         </CartItem>
       ))}
       <h2>Total: ${totalPrice.toFixed(2)}</h2>

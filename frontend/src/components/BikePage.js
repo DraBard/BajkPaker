@@ -77,9 +77,14 @@ const BikePage = () => {
         </Description>
       )}
       {bike.images.map((image) => (
-        <BikeImage key={image.id} src={`http://localhost:8000${image.image_url}`} alt={bike.name} />
+        <BikeImage key={image.id} src={`http://localhost:8001${image.image_url}`} alt={bike.name} />
       ))}
-      <AddToCartButton onClick={() => addToCart(bike)}>Add to Cart</AddToCartButton>
+      <AddToCartButton onClick={() => {
+        console.log('Button clicked:', bike); // Debugging statement
+        addToCart(bike);
+      }}>
+        Add to Cart
+      </AddToCartButton>
     </BikeContainer>
   );
 };

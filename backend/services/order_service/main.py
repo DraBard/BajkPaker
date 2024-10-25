@@ -1,21 +1,20 @@
-# backend/services/order_service/main.py
-
-import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import router as order_router
-import os
+import uvicorn
 
 app = FastAPI()
 
+# Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Adjust this to your frontend URL
+    allow_origins=["*"],  # Change to "*" for testing or ensure "http://localhost:3000" is correct
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Include your routers
 app.include_router(order_router)
 
 if __name__ == "__main__":

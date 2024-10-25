@@ -2,9 +2,14 @@
 import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 import yaml
 from pathlib import Path
+# Add the path for Base to python paths
+import sys
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# Import Base from both services
+from services.product_service.models import Base as ProductBase
+from services.order_service.models import Base as OrderBase
 
 
 # Load configuration
@@ -29,12 +34,9 @@ AsyncSessionLocalOrder = sessionmaker(
     engine_order, class_=AsyncSession, expire_on_commit=False
 )
 
-# Declarative Base
-Base = declarative_base()
-
 
 # Function to drop all tables in a given engine
-async def drop_all_tables(engine):
+async def drop_all_tables(engine, Base):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         print(f"All tables dropped in {engine.url.database}")
@@ -42,8 +44,8 @@ async def drop_all_tables(engine):
 
 # Main function to run the drop tables script for both databases
 async def main():
-    await drop_all_tables(engine_product)
-    await drop_all_tables(engine_order)
+    await drop_all_tables(engine_product, ProductBase)
+    await drop_all_tables(engine_order, OrderBase)
 
 
 # Running the script

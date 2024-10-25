@@ -1,5 +1,3 @@
-# backend/services/order_service/schemas.py
-
 from pydantic import BaseModel
 from typing import List
 

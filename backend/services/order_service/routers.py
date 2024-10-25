@@ -57,6 +57,11 @@ async def read_order(order_id: int, db: AsyncSession = Depends(get_db)):
 
 @router.post("/api/cart", response_model=CartItemOut)
 async def add_to_cart(cart_item: CartItemCreate, db: AsyncSession = Depends(get_db)):
+    # Verify that the bike_id exists in the bikes table
+    bike = await db.get(Bike, cart_item.bike_id)
+    if not bike:
+        raise HTTPException(status_code=404, detail="Bike not found")
+
     new_cart_item = CartItem(bike_id=cart_item.bike_id, quantity=cart_item.quantity)
     db.add(new_cart_item)
     await db.commit()
@@ -69,3 +74,13 @@ async def get_cart(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(CartItem).options(selectinload(CartItem.bike)))
     cart_items = result.scalars().all()
     return cart_items
+
+
+@router.delete("/api/cart/{cart_item_id}", response_model=CartItemOut)
+async def remove_from_cart(cart_item_id: int, db: AsyncSession = Depends(get_db)):
+    cart_item = await db.get(CartItem, cart_item_id)
+    if not cart_item:
+        raise HTTPException(status_code=404, detail="Cart item not found")
+    await db.delete(cart_item)
+    await db.commit()
+    return cart_item

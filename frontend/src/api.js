@@ -23,6 +23,11 @@ export const fetchCart = async () => {
   return response.data;
 };
 
+export const removeFromCart = async (cartItemId) => {
+  const response = await axios.delete(`${ORDER_API_URL}/cart/${cartItemId}`);
+  return response.data;
+};
+
 export const createOrder = async (order) => {
   const response = await axios.post(`${ORDER_API_URL}/orders`, order);
   return response.data;

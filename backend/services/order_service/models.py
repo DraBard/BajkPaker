@@ -1,5 +1,3 @@
-# backend/services/order_service/models.py
-
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, Boolean
 from sqlalchemy.orm import relationship, declarative_base
 

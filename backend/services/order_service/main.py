@@ -8,7 +8,9 @@ app = FastAPI()
 # Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change to "*" for testing or ensure "http://localhost:3000" is correct
+    allow_origins=[
+        "*"
+    ],  # Change to "*" for testing or ensure "http://localhost:3000" is correct
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -18,9 +18,11 @@ from backend.services.order_service.models import (
     Base as OrderBase,
 )  # Import models from order_service
 
+
 def load_config(file_path):
     with open(file_path, "r") as file:
         return yaml.safe_load(file)
+
 
 config_path = Path(__file__).resolve().parents[2] / "config.yaml"
 config = load_config(config_path)
@@ -103,7 +105,10 @@ async def add_mock_bikes():
                 description=bike["description"],
                 price=bike["price"],
                 images=[
-                    ProductBikeImage(image_url=image["image_url"], is_main=image.get("is_main", False))
+                    ProductBikeImage(
+                        image_url=image["image_url"],
+                        is_main=image.get("is_main", False),
+                    )
                     for image in bike["images"]
                 ],
             )
@@ -112,7 +117,10 @@ async def add_mock_bikes():
                 description=bike["description"],
                 price=bike["price"],
                 images=[
-                    OrderBikeImage(image_url=image["image_url"], is_main=image.get("is_main", False))
+                    OrderBikeImage(
+                        image_url=image["image_url"],
+                        is_main=image.get("is_main", False),
+                    )
                     for image in bike["images"]
                 ],
             )
@@ -130,12 +138,15 @@ async def add_mock_bikes():
 
 # Main function to run the database setup and data population
 async def main():
-    await create_tables(engine_product, ProductBase)  # Create the tables in the product database
-    await create_tables(engine_order, OrderBase)  # Create the tables in the order database
+    await create_tables(
+        engine_product, ProductBase
+    )  # Create the tables in the product database
+    await create_tables(
+        engine_order, OrderBase
+    )  # Create the tables in the order database
     await add_mock_bikes()  # Insert mock data into the databases
 
 
 # Running the script
 if __name__ == "__main__":
     asyncio.run(main())
- 

@@ -4,8 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 import yaml
 from pathlib import Path
+
 # Add the path for Base to python paths
 import sys
+
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # Import Base from both services
 from services.product_service.models import Base as ProductBase

@@ -1,6 +1,6 @@
 // frontend/src/components/CartPage.js
 
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { CartContext } from '../CartContext';
 import { fetchCart } from '../api';
@@ -36,7 +36,9 @@ const RemoveButton = styled.button`
 `;
 
 const CartPage = () => {
-  const { cart, removeFromCart } = useContext(CartContext);
+  const { cart, setCart, removeFromCart } = useContext(CartContext);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const getCart = async () => {
@@ -45,28 +47,56 @@ const CartPage = () => {
         setCart(data);
       } catch (error) {
         console.error('Failed to fetch cart:', error);
+        setError('Failed to load cart items');
       }
     };
 
     getCart();
-  }, []);
+  }, [setCart]);
+
+  const handleRemoveFromCart = async (itemId) => {
+    setIsLoading(true);
+    try {
+      await removeFromCart(itemId);
+    } catch (error) {
+      setError('Failed to remove item from cart');
+      console.error('Failed to remove item:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const totalPrice = cart.reduce((total, item) => total + item.bike.price * item.quantity, 0);
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
 
   return (
     <CartContainer>
       <h1>Your Cart</h1>
-      {cart.map((item) => (
-        <CartItem key={item.id}>
-          <div>
-            <h3>{item.bike.name}</h3>
-            <p>Quantity: {item.quantity}</p>
-            <p>Price: ${item.bike.price}</p>
-          </div>
-          <RemoveButton onClick={() => removeFromCart(item.id)}>Remove</RemoveButton>
-        </CartItem>
-      ))}
-      <h2>Total: ${totalPrice.toFixed(2)}</h2>
+      {cart.length === 0 ? (
+        <p>Your cart is empty</p>
+      ) : (
+        <>
+          {cart.map((item) => (
+            <CartItem key={item.id}>
+              <div>
+                <h3>{item.bike.name}</h3>
+                <p>Quantity: {item.quantity}</p>
+                <p>Price: ${item.bike.price}</p>
+              </div>
+              <RemoveButton 
+                onClick={() => handleRemoveFromCart(item.id)}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Removing...' : 'Remove'}
+              </RemoveButton>
+            </CartItem>
+          ))}
+          <h2>Total: ${totalPrice.toFixed(2)}</h2>
+        </>
+      )}
     </CartContainer>
   );
 };

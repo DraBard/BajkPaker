@@ -42,13 +42,15 @@ export const CartProvider = ({ children }) => {
     try {
       await apiRemoveFromCart(cartItemId);
       setCart((prevCart) => prevCart.filter((item) => item.id !== cartItemId));
+      return true;
     } catch (error) {
       console.error('Failed to remove from cart:', error);
+      throw error;
     }
   };
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart }}>
+    <CartContext.Provider value={{ cart, setCart, addToCart, removeFromCart }}>
       {children}
     </CartContext.Provider>
   );

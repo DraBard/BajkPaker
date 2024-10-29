@@ -45,6 +45,9 @@ const AddToCartButton = styled.button`
 const BikePage = () => {
   const { bikeId } = useParams();
   const [bike, setBike] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [addedToCart, setAddedToCart] = useState(false);
   const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
@@ -52,13 +55,33 @@ const BikePage = () => {
       try {
         const data = await fetchBike(bikeId);
         setBike(data);
+        setAddedToCart(false);
       } catch (error) {
         console.error('Failed to fetch bike:', error);
+        setError('Failed to load bike details');
       }
     };
 
     getBike();
   }, [bikeId]);
+
+  const handleAddToCart = async () => {
+    setIsLoading(true);
+    try {
+      await addToCart(bike);
+      setAddedToCart(true);
+      alert('Bike added to cart successfully!');
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      setError('Failed to add bike to cart');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (error) {
+    return <p>{error}</p>;
+  }
 
   if (!bike) {
     return <p>Loading...</p>;
@@ -77,13 +100,17 @@ const BikePage = () => {
         </Description>
       )}
       {bike.images.map((image) => (
-        <BikeImage key={image.id} src={`http://localhost:8001${image.image_url}`} alt={bike.name} />
+        <BikeImage 
+          key={image.id} 
+          src={`http://localhost:8001${image.image_url}`} 
+          alt={bike.name} 
+        />
       ))}
-      <AddToCartButton onClick={() => {
-        console.log('Button clicked:', bike); // Debugging statement
-        addToCart(bike);
-      }}>
-        Add to Cart
+      <AddToCartButton 
+        onClick={handleAddToCart} 
+        disabled={isLoading || addedToCart}
+      >
+        {isLoading ? 'Adding to Cart...' : addedToCart ? 'Added to Cart' : 'Add to Cart'}
       </AddToCartButton>
     </BikeContainer>
   );

@@ -7,43 +7,32 @@ import sys
 
 project_root = Path(__file__).resolve().parents[2]
 sys.path.append(str(project_root))
-from backend.services.product_service.models import (
-    Bike as ProductBike,
-    BikeImage as ProductBikeImage,
-    Base as ProductBase,
-)  # Import models from product_service
-from backend.services.order_service.models import (
-    Bike as OrderBike,
-    BikeImage as OrderBikeImage,
-    Base as OrderBase,
-)  # Import models from order_service
 
+# Import shared database models
+from backend.shared_database.models import (
+    Base,
+    Bike,
+    BikeImage
+)
 
 def load_config(file_path):
     with open(file_path, "r") as file:
         return yaml.safe_load(file)
 
-
 config_path = Path(__file__).resolve().parents[2] / "config.yaml"
 config = load_config(config_path)
-DATABASE_URL_PRODUCT = config["database_product_dev"]["url"]
-DATABASE_URL_ORDER = config["database_order_dev"]["url"]
+DATABASE_URL = config["database_dev"]["url"]
 
-engine_product = create_async_engine(DATABASE_URL_PRODUCT, echo=True)
-AsyncSessionLocalProduct = sessionmaker(
-    engine_product, class_=AsyncSession, expire_on_commit=False
+engine = create_async_engine(DATABASE_URL, echo=True)
+AsyncSessionLocal = sessionmaker(
+    engine, 
+    class_=AsyncSession, 
+    expire_on_commit=False
 )
 
-engine_order = create_async_engine(DATABASE_URL_ORDER, echo=True)
-AsyncSessionLocalOrder = sessionmaker(
-    engine_order, class_=AsyncSession, expire_on_commit=False
-)
-
-
-async def create_tables(engine, Base):
+async def create_tables():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-
 
 async def add_mock_bikes():
     imgs_path = Path("static/images")
@@ -95,58 +84,30 @@ async def add_mock_bikes():
         },
     ]
 
-    async with AsyncSessionLocalProduct() as session_product, AsyncSessionLocalOrder() as session_order:
-        product_bikes = []
-        order_bikes = []
-
-        for bike in mock_bikes:
-            product_bike = ProductBike(
-                name=bike["name"],
-                description=bike["description"],
-                price=bike["price"],
+    async with AsyncSessionLocal() as session:
+        bikes = []
+        for bike_data in mock_bikes:
+            bike = Bike(
+                name=bike_data["name"],
+                description=bike_data["description"],
+                price=bike_data["price"],
                 images=[
-                    ProductBikeImage(
+                    BikeImage(
                         image_url=image["image_url"],
                         is_main=image.get("is_main", False),
                     )
-                    for image in bike["images"]
+                    for image in bike_data["images"]
                 ],
             )
-            order_bike = OrderBike(
-                name=bike["name"],
-                description=bike["description"],
-                price=bike["price"],
-                images=[
-                    OrderBikeImage(
-                        image_url=image["image_url"],
-                        is_main=image.get("is_main", False),
-                    )
-                    for image in bike["images"]
-                ],
-            )
-            product_bikes.append(product_bike)
-            order_bikes.append(order_bike)
+            bikes.append(bike)
 
-        session_product.add_all(product_bikes)
-        session_order.add_all(order_bikes)
+        session.add_all(bikes)
+        await session.commit()
+        print("Mock bikes added to database")
 
-        await session_product.commit()
-        await session_order.commit()
-
-        print("Mock bikes added to both product and order databases")
-
-
-# Main function to run the database setup and data population
 async def main():
-    await create_tables(
-        engine_product, ProductBase
-    )  # Create the tables in the product database
-    await create_tables(
-        engine_order, OrderBase
-    )  # Create the tables in the order database
-    await add_mock_bikes()  # Insert mock data into the databases
+    await create_tables()  # Create the tables in the single database
+    await add_mock_bikes()  # Insert mock data into the database
 
-
-# Running the script
 if __name__ == "__main__":
     asyncio.run(main())

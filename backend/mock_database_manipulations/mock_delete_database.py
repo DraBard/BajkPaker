@@ -27,11 +27,7 @@ DATABASE_URL = config["database_dev"]["url"]
 
 # Create async engines and sessions
 engine = create_async_engine(DATABASE_URL, echo=True)
-AsyncSessionLocal = sessionmaker(
-    engine, 
-    class_=AsyncSession, 
-    expire_on_commit=False
-)
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 # Function to drop all tables in a given engine

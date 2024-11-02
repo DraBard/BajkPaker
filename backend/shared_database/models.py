@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship, declarative_base
 
 Base = declarative_base()
 
+
 class Bike(Base):
     __tablename__ = "bikes"
     id = Column(Integer, primary_key=True)
@@ -14,6 +15,7 @@ class Bike(Base):
     cart_items = relationship("CartItem", back_populates="bike")
     order_items = relationship("OrderItem", back_populates="bike")
 
+
 class BikeImage(Base):
     __tablename__ = "bike_images"
     id = Column(Integer, primary_key=True)
@@ -22,6 +24,7 @@ class BikeImage(Base):
     is_main = Column(Boolean, default=False)
     bike = relationship("Bike", back_populates="images")
 
+
 class CartItem(Base):
     __tablename__ = "cart_items"
     id = Column(Integer, primary_key=True)
@@ -29,11 +32,13 @@ class CartItem(Base):
     quantity = Column(Integer, nullable=False)
     bike = relationship("Bike", back_populates="cart_items")
 
+
 class Order(Base):
     __tablename__ = "orders"
     id = Column(Integer, primary_key=True)
     total_price = Column(Float, nullable=False)
     items = relationship("OrderItem", back_populates="order")
+
 
 class OrderItem(Base):
     __tablename__ = "order_items"
@@ -42,4 +47,4 @@ class OrderItem(Base):
     bike_id = Column(Integer, ForeignKey("bikes.id"))
     quantity = Column(Integer, nullable=False)
     bike = relationship("Bike", back_populates="order_items")
-    order = relationship("Order", back_populates="items") 
+    order = relationship("Order", back_populates="items")

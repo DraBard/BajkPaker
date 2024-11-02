@@ -9,30 +9,26 @@ project_root = Path(__file__).resolve().parents[2]
 sys.path.append(str(project_root))
 
 # Import shared database models
-from backend.shared_database.models import (
-    Base,
-    Bike,
-    BikeImage
-)
+from backend.shared_database.models import Base, Bike, BikeImage
+
 
 def load_config(file_path):
     with open(file_path, "r") as file:
         return yaml.safe_load(file)
+
 
 config_path = Path(__file__).resolve().parents[2] / "config.yaml"
 config = load_config(config_path)
 DATABASE_URL = config["database_dev"]["url"]
 
 engine = create_async_engine(DATABASE_URL, echo=True)
-AsyncSessionLocal = sessionmaker(
-    engine, 
-    class_=AsyncSession, 
-    expire_on_commit=False
-)
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
 
 async def create_tables():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
 
 async def add_mock_bikes():
     imgs_path = Path("static/images")
@@ -105,9 +101,11 @@ async def add_mock_bikes():
         await session.commit()
         print("Mock bikes added to database")
 
+
 async def main():
     await create_tables()  # Create the tables in the single database
     await add_mock_bikes()  # Insert mock data into the database
+
 
 if __name__ == "__main__":
     asyncio.run(main())

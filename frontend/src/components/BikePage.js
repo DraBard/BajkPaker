@@ -94,6 +94,12 @@ const BikePage = () => {
       <h1>{bike.name}</h1>
       <p>{bike.description}</p>
       <p>${bike.price}</p>
+      <AddToCartButton 
+        onClick={handleAddToCart} 
+        disabled={isLoading || addedToCart}
+      >
+        {isLoading ? 'Adding to Cart...' : addedToCart ? 'Added to Cart' : 'Add to Cart'}
+      </AddToCartButton>
       {bikeStyle.additionalContent && (
         <Description color={bikeStyle.descriptionColor}>
           {bikeStyle.additionalContent}
@@ -106,12 +112,6 @@ const BikePage = () => {
           alt={bike.name} 
         />
       ))}
-      <AddToCartButton 
-        onClick={handleAddToCart} 
-        disabled={isLoading || addedToCart}
-      >
-        {isLoading ? 'Adding to Cart...' : addedToCart ? 'Added to Cart' : 'Add to Cart'}
-      </AddToCartButton>
     </BikeContainer>
   );
 };

@@ -8,6 +8,7 @@ module.exports = {
     filename: 'bundle.js',
     publicPath: '/',
   },
+  // Proxy to forward requests to the correct services and avoid CORS issues
   devServer: {
     static: {
       directory: path.join(__dirname, 'public'),
@@ -16,8 +17,13 @@ module.exports = {
     historyApiFallback: true,
     proxy: [
       {
-        context: ['/api'],
-        target: 'http://localhost:8000',
+        context: ['/api'], // Requests to '/api' go to service 1
+        target: 'http://localhost:8001',
+        changeOrigin: true,
+      },
+      {
+        context: ['/api'], // Requests to '/auth' go to service 2
+        target: 'http://localhost:8002',
         changeOrigin: true,
       },
     ],

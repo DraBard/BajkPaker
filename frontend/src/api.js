@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const PRODUCT_API_URL = 'http://localhost:8001/api';  // Updated port to 8001
 const ORDER_API_URL = 'http://localhost:8002/api';    // Updated port to 8002
+const USER_API_URL = 'http://localhost:8003/api';
 
 export const fetchBikes = async () => {
   const response = await axios.get(`${PRODUCT_API_URL}/bikes`);
@@ -30,5 +31,15 @@ export const removeFromCart = async (cartItemId) => {
 
 export const createOrder = async (order) => {
   const response = await axios.post(`${ORDER_API_URL}/orders`, order);
+  return response.data;
+};
+
+export const registerUser = async (userData) => {
+  const response = await axios.post(`${USER_API_URL}/users`, userData);
+  return response.data;
+};
+
+export const loginUser = async (userData) => {
+  const response = await axios.post(`${USER_API_URL}/users/login`, userData);
   return response.data;
 };

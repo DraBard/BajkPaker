@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaShoppingCart, FaHome, FaStore, FaInfoCircle, FaEnvelope, FaRecycle } from 'react-icons/fa';
+import { FaShoppingCart, FaHome, FaStore, FaInfoCircle, FaEnvelope, FaRecycle, FaUserPlus, FaSignInAlt } from 'react-icons/fa';
 
 const NavBar = styled.nav`
   background-color: ${props => props.theme.colors.light};
@@ -64,10 +64,11 @@ const Header = () => (
       <NavLinks>
         <NavLink to="/"><FaHome /> Home</NavLink>
         <NavLink to="/shop"><FaStore /> Shop</NavLink>
-        <NavLink to="/about"><FaInfoCircle /> About</NavLink>
-        <NavLink to="/contact"><FaEnvelope /> Contact</NavLink>
         <NavLink to="/revived"><FaRecycle /> Revived</NavLink>
         <NavLink to="/cart"><FaShoppingCart /> Cart</NavLink>
+        <NavLink to="/about"><FaInfoCircle /> About</NavLink>
+        <NavLink to="/contact"><FaEnvelope /> Contact</NavLink>
+        <NavLink to="/user"><FaUserPlus /> Register/Log in</NavLink>
       </NavLinks>
     </NavContent>
   </NavBar>

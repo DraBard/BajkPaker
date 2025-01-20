@@ -1,0 +1,1 @@
+Design a logo for custom bikes shop. It should be simplistic black an white logo with visible only front fork and the shock absorbers. design the piston so they look like human muscles.

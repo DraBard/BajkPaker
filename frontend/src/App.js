@@ -9,7 +9,8 @@ import AboutPage from './components/AboutPage';
 import ContactPage from './components/ContactPage';
 import BikePage from './components/BikePage';
 import CartPage from './components/CartPage';
-import RevivedPage from './components/RevivedPage';  // New import
+import RevivedPage from './components/RevivedPage';
+import UserPage from './components/UserPage';
 import GlobalStyle from './styles/GlobalStyle';
 import theme from './styles/theme';
 import { CartProvider } from './CartContext';
@@ -26,7 +27,8 @@ function App() {
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/shop/:bikeId" element={<BikePage />} />
             <Route path="/cart" element={<CartPage />} />
-            <Route path="/revived" element={<RevivedPage />} />  {/* New route */}
+            <Route path="/revived" element={<RevivedPage />} />
+            <Route path="/user" element={<UserPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
           </Routes>

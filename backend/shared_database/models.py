@@ -48,3 +48,11 @@ class OrderItem(Base):
     quantity = Column(Integer, nullable=False)
     bike = relationship("Bike", back_populates="order_items")
     order = relationship("Order", back_populates="items")
+
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    password = Column(String)
+    email = Column(String, unique=True, index=True, nullable=False)

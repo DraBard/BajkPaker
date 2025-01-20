@@ -11,9 +11,12 @@ from schemas import UserCreate, UserOut, UserLogin  # Create these schemas as ne
 
 router = APIRouter()
 
+
 @router.post("/api/users", response_model=UserOut)
 async def create_user(user_input: UserCreate, db: AsyncSession = Depends(get_db)):
-    existing = await db.execute(select(User).where(User.username == user_input.username))
+    existing = await db.execute(
+        select(User).where(User.username == user_input.username)
+    )
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Username already exists")
 
@@ -27,6 +30,7 @@ async def create_user(user_input: UserCreate, db: AsyncSession = Depends(get_db)
     await db.refresh(new_user)
     return new_user
 
+
 @router.get("/api/users/{user_id}", response_model=UserOut)
 async def read_user(user_id: int, db: AsyncSession = Depends(get_db)):
     user = await db.get(User, user_id)
@@ -34,10 +38,15 @@ async def read_user(user_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
+
 @router.post("/api/users/login")
 async def login_user(user_input: UserLogin, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.username == user_input.username))
     user = result.scalar_one_or_none()
     if not user or user.password != user_input.password:
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    return {"message": "Login successful", "user_id": user.id, "username": user.username}
+    return {
+        "message": "Login successful",
+        "user_id": user.id,
+        "username": user.username,
+    }

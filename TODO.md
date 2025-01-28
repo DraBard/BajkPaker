@@ -2,3 +2,5 @@
 
 1. Configure github actions to run black formatting and others -> DONE
 2. Swagger
+
+![alt text](image.png)

@@ -155,3 +155,4 @@ dist/
 githubtoken.md
 
 backend/services/product_service/static/images/*
+image.png

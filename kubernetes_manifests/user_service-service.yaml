@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.35.0 (HEAD)
+  labels:
+    io.kompose.service: user-service
+  name: user_service
+spec:
+  ports:
+    - name: "8003"
+      port: 8003
+      targetPort: 8003
+  selector:
+    io.kompose.service: user-service

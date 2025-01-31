@@ -1,0 +1,23 @@
+# backend/Dockerfile.base
+FROM python:3.10-slim
+
+# Install build tools and dependencies
+RUN apt-get update && apt-get install -y gcc libmariadb-dev && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the application code (this assumes all backend code is available)
+COPY . .
+
+# Expose the service port using an environment variable
+EXPOSE ${PORT}
+
+# Command to run the application
+CMD ["python", "main.py"]
+
+# DUIRING BUILDIN HAS TO BE TAGGED 'docker build -f Dockerfile.base -t backend-base'.
+# Otherwise there will be no link between the base image and the service images

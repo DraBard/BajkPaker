@@ -23,7 +23,7 @@ def load_config(file_path):
 
 config_path = Path(__file__).resolve().parents[2] / "config.yaml"
 config = load_config(config_path)
-DATABASE_URL = config["database_dev"]["url"]
+DATABASE_URL = config["local"]["database_dev"]["url"]
 
 # Create async engines and sessions
 engine = create_async_engine(DATABASE_URL, echo=True)

@@ -1,4 +1,11 @@
-database_dev:
-  url: mysql+asyncmy://root:BajkPaker33@localhost/bajkpaker_dev
-database_prod:
-  url: mysql+asyncmy://root:BajkPaker33@localhost/bajkpaker_prod
+local:
+  database_dev:
+    url: mysql+asyncmy://root:BajkPaker33@localhost/bajkpaker_dev
+  database_prod:
+    url: mysql+asyncmy://root:BajkPaker33@localhost/bajkpaker_prod
+
+deployment:
+  database_dev:
+    url: mysql+asyncmy://root:BajkPaker33@/bajkpaker_dev?unix_socket=/cloudsql/bajkpaker:europe-central2:bajkpaker-db
+  database_prod:
+    url: mysql+asyncmy://root:BajkPaker33@/bajkpaker_prod?unix_socket=/cloudsql/bajkpaker:europe-central2:bajkpaker-db

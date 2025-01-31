@@ -23,7 +23,7 @@ spec:
       containers:
         - env:
             - name: DATABASE_URL
-              value: mysql+asyncmy://root:Bartek11@db/bajkpaker_dev
+              value: mysql+asyncmy://root:BajkPaker33@db/bajkpaker_dev
           image: product-service
           name: product-service
           ports:

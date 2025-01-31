@@ -8,7 +8,7 @@ services:
     depends_on:
       - db
     environment:
-      - DATABASE_URL=mysql+asyncmy://root:Bartek11@db/bajkpaker_dev
+      - DATABASE_URL=mysql+asyncmy://root:BajkPaker33@db/bajkpaker_dev
 
   order_service:
     build: ./backend/services/order_service
@@ -18,7 +18,7 @@ services:
     depends_on:
       - db
     environment:
-      - DATABASE_URL=mysql+asyncmy://root:Bartek11@db/bajkpaker_dev
+      - DATABASE_URL=mysql+asyncmy://root:BajkPaker33@db/bajkpaker_dev
 
   user_service:
     build: ./backend/services/user_service
@@ -28,7 +28,7 @@ services:
     depends_on:
       - db
     environment:
-      - DATABASE_URL=mysql+asyncmy://root:Bartek11@db/bajkpaker_dev
+      - DATABASE_URL=mysql+asyncmy://root:BajkPaker33@db/bajkpaker_dev
 
   frontend:
     build: ./frontend
@@ -44,7 +44,7 @@ services:
     image: mysql:8
     container_name: mysql_db
     environment:
-      MYSQL_ROOT_PASSWORD: Bartek11
+      MYSQL_ROOT_PASSWORD: BajkPaker33
       MYSQL_DATABASE: bajkpaker_dev
     ports:
       - "3306:3306"

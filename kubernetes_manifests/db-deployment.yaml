@@ -25,7 +25,7 @@ spec:
             - name: MYSQL_DATABASE
               value: bajkpaker_dev
             - name: MYSQL_ROOT_PASSWORD
-              value: Bartek11
+              value: BajkPaker33
           image: mysql:8
           name: mysql-db
           ports:

@@ -8,6 +8,7 @@ def load_config(file_path):
     with open(file_path, "r") as file:
         return yaml.safe_load(file)
 
+
 config_path = Path(__file__).resolve().parent / "config.yaml"
 config = load_config(config_path)
 if config["mode"] == "deployment":

@@ -28,6 +28,7 @@ module.exports = {
       },
     ],
     hot: true,
+    allowedHosts: 'all', // Add this line to allow all hosts
   },
   plugins: [
     new HtmlWebpackPlugin({

@@ -6,11 +6,15 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 import sys
 from pathlib import Path
-
-sys.path.append(str(Path(__file__).resolve().parents[2]))
-from shared_database.models import Order, OrderItem, CartItem, Bike
-from shared_database.database import get_db
 from schemas import OrderCreate, OrderOut, CartItemCreate, CartItemOut
+
+try:
+    from shared_database.models import Order, OrderItem, CartItem, Bike
+    from shared_database.database import get_db
+except ImportError:
+    sys.path.append(str(Path(__file__).resolve().parents[2]))
+    from shared_database.models import Order, OrderItem, CartItem, Bike
+    from shared_database.database import get_db
 
 router = APIRouter()
 

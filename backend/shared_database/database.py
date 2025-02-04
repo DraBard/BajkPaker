@@ -1,13 +1,15 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 import yaml
+from pathlib import Path
 
 
 def load_config(file_path):
     with open(file_path, "r") as file:
         return yaml.safe_load(file)
 
-config = load_config("config.yaml")
+config_path = Path(__file__).resolve().parent / "config.yaml"
+config = load_config(config_path)
 if config["mode"] == "deployment":
     DATABASE_URL = config["deployment"]["database_dev"]["url"]
 elif config["mode"] == "local":

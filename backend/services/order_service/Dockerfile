@@ -1,18 +1,22 @@
-# backend/service1/Dockerfile
-
-# Use the pre-built base image
 FROM python:3.10-slim
+
+# Install build tools and dependencies
 RUN apt-get update && apt-get install -y gcc libmariadb-dev && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY requirements.txt .
+
+# Copy the requirements file and install dependencies
+COPY services/order_service/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Set the service-specific port
-ENV PORT=8002
+# Copy the service code
+COPY services/order_service /app
 
-COPY . .
-# Inform Docker of the port this service listens on
+# Copy the shared database code and config file
+COPY shared_database /app/shared_database
+
+# Expose the service port
 EXPOSE 8002
 
-CMD ["python", "main.py"]
+# Command to run the application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]

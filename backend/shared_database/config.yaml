@@ -1,3 +1,4 @@
+mode: deployment
 local:
   database_dev:
     url: mysql+asyncmy://root:BajkPaker33@localhost/bajkpaker_dev

@@ -50,6 +50,7 @@ class OrderItemOut(BaseModel):
 class OrderOut(BaseModel):
     id: int
     total_price: float
+    status: str
     items: List[OrderItemOut]
 
     class Config:

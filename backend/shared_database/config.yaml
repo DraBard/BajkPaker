@@ -1,12 +1,12 @@
-mode: deployment
+mode: local
+
 local:
   database_dev:
-    url: mysql+asyncmy://root:BajkPaker33@localhost/bajkpaker_dev
+    url: mysql+asyncmy://root:${DB_PASSWORD}@localhost/bajkpaker_dev
   database_prod:
-    url: mysql+asyncmy://root:BajkPaker33@localhost/bajkpaker_prod
-
+    url: mysql+asyncmy://root:${DB_PASSWORD}@localhost/bajkpaker_prod
 deployment:
   database_dev:
-    url: mysql+asyncmy://root:BajkPaker33@/bajkpaker_dev?unix_socket=/cloudsql/bajkpaker:europe-central2:bajkpaker-db
+    url: mysql+asyncmy://root:${DB_PASSWORD}@/bajkpaker_dev?unix_socket=/cloudsql/bajkpaker:europe-central2:bajkpaker-db
   database_prod:
-    url: mysql+asyncmy://root:BajkPaker33@/bajkpaker_prod?unix_socket=/cloudsql/bajkpaker:europe-central2:bajkpaker-db
+    url: mysql+asyncmy://root:${DB_PASSWORD}@/bajkpaker_prod?unix_socket=/cloudsql/bajkpaker:europe-central2:bajkpaker-db

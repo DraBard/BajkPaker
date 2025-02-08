@@ -1,12 +1,13 @@
 # backend/services/order_service/routers.py
-
-from fastapi import APIRouter, Depends, HTTPException
+import stripe
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 import sys
 from pathlib import Path
 from schemas import OrderCreate, OrderOut, CartItemCreate, CartItemOut
+import os
 
 try:
     from shared_database.models import Order, OrderItem, CartItem, Bike
@@ -17,6 +18,7 @@ except ImportError:
     from shared_database.database import get_db
 
 router = APIRouter()
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY") 
 
 
 @router.get("/api/cart", response_model=list[CartItemOut])
@@ -70,3 +72,55 @@ async def create_order(order: OrderCreate, db: AsyncSession = Depends(get_db)):
 
     await db.commit()
     return new_order
+
+#Stripe payment
+@router.post("/api/payments/create-checkout-session")
+async def create_checkout_session(order_id: int, db: AsyncSession = Depends(get_db)):
+    # Fetch order
+    result = await db.execute(select(Order).where(Order.id == order_id))
+    order = result.scalar_one_or_none()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    # Create Stripe Checkout Session
+    session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        line_items=[
+            {
+                "price_data": {
+                    "currency": "pln",
+                    "product_data": {"name": "Order #" + str(order.id)},
+                    "unit_amount": int(order.total_price * 100),
+                },
+                "quantity": 1,
+            }
+        ],
+        mode="payment",
+        success_url="http://localhost:3000/payment-success",
+        cancel_url="http://localhost:3000/payment-cancel",
+    )
+    return {"checkoutUrl": session.url}
+
+@router.post("/api/payments/webhook")
+async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
+    endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+    except stripe.error.SignatureVerificationError:
+        raise HTTPException(status_code=400, detail="Invalid Signature")
+
+    if event["type"] == "checkout.session.completed":
+        session_obj = event["data"]["object"]
+
+        # Retrieve the order from the session's metadata
+        order_id = session_obj["metadata"].get("order_id")
+        result = await db.execute(select(Order).where(Order.id == order_id))
+        order = result.scalar_one_or_none()
+        if order:
+            order.status = "paid"
+            await db.commit()
+
+    return {"status": "success"}

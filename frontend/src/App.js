@@ -31,6 +31,8 @@ function App() {
             <Route path="/user" element={<UserPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/payment-success" element={<h1>Payment Successful!</h1>} />
+            <Route path="/payment-cancel" element={<h1>Payment Canceled</h1>} />
           </Routes>
           <Footer />
         </Router>

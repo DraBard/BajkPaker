@@ -37,6 +37,7 @@ class Order(Base):
     __tablename__ = "orders"
     id = Column(Integer, primary_key=True)
     total_price = Column(Float, nullable=False)
+    status = Column(String(50), default="pending")  # Add this line
     items = relationship("OrderItem", back_populates="order")
 
 

@@ -4,6 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 import yaml
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Add the path for Base to python paths
 import sys
@@ -21,9 +25,9 @@ def load_config(file_path):
         return yaml.safe_load(file)
 
 
-config_path = Path(__file__).resolve().parents[2] / "config.yaml"
+config_path = Path(__file__).resolve().parents[1] / "shared_database" / "config.yaml"
 config = load_config(config_path)
-DATABASE_URL = config["local"]["database_dev"]["url"]
+DATABASE_URL = config["local"]["database_dev"]["url"].replace("${DB_PASSWORD}", os.getenv("DB_PASSWORD"))
 
 # Create async engines and sessions
 engine = create_async_engine(DATABASE_URL, echo=True)

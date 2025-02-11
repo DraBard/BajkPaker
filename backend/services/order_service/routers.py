@@ -1,4 +1,3 @@
-# backend/services/order_service/routers.py
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -55,9 +54,13 @@ async def remove_from_cart(item_id: int, db: AsyncSession = Depends(get_db)):
     if not cart_item:
         raise HTTPException(status_code=404, detail="Cart item not found")
 
+    bike = await db.get(Bike, cart_item.bike_id)
+    if bike:
+        bike.bought = False  # Update the bike status to 0 (False)
+
     await db.delete(cart_item)
     await db.commit()
-    return {"message": "Item removed from cart"}
+    return {"message": "Item removed from cart and bike status updated"}
 
 
 @router.post("/api/orders", response_model=OrderOut)
@@ -79,6 +82,13 @@ async def create_order(order: OrderCreate, db: AsyncSession = Depends(get_db)):
         bike.bought = True
 
     await db.commit()
+
+    # Eagerly load related items
+    result = await db.execute(
+        select(Order).where(Order.id == new_order.id).options(selectinload(Order.items))
+    )
+    new_order = result.scalar_one_or_none()
+
     return new_order
 
 

@@ -18,7 +18,7 @@ except ImportError:
     from shared_database.database import get_db
 
 router = APIRouter()
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY") 
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 
 @router.get("/api/cart", response_model=list[CartItemOut])
@@ -81,7 +81,8 @@ async def create_order(order: OrderCreate, db: AsyncSession = Depends(get_db)):
     await db.commit()
     return new_order
 
-#Stripe payment
+
+# Stripe payment
 @router.post("/api/payments/create-checkout-session")
 async def create_checkout_session(order_id: int, db: AsyncSession = Depends(get_db)):
     # Fetch order
@@ -108,6 +109,7 @@ async def create_checkout_session(order_id: int, db: AsyncSession = Depends(get_
         cancel_url="http://localhost:3000/payment-cancel",
     )
     return {"checkoutUrl": session.url}
+
 
 @router.post("/api/payments/webhook")
 async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):

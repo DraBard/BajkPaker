@@ -23,7 +23,9 @@ def load_config(file_path):
 
 config_path = Path(__file__).resolve().parents[1] / "shared_database" / "config.yaml"
 config = load_config(config_path)
-DATABASE_URL = config["local"]["database_dev"]["url"].replace("${DB_PASSWORD}", os.getenv("DB_PASSWORD"))
+DATABASE_URL = config["local"]["database_dev"]["url"].replace(
+    "${DB_PASSWORD}", os.getenv("DB_PASSWORD")
+)
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)

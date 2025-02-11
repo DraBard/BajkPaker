@@ -7,7 +7,7 @@ Base = declarative_base()
 class Bike(Base):
     __tablename__ = "bikes"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255), nullable=False) 
+    name = Column(String(255), nullable=False)
     price = Column(Integer, nullable=False)
     description = Column(String(10000), nullable=True)  # Specify length for VARCHAR
     bought = Column(Boolean, default=False)
@@ -56,4 +56,6 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(124), unique=True, index=True)  # Limit username length
     password = Column(String(255))  # Limit password length
-    email = Column(String(255), unique=True, index=True, nullable=False)  # Limit email length
+    email = Column(
+        String(255), unique=True, index=True, nullable=False
+    )  # Limit email length

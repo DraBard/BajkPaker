@@ -13,7 +13,15 @@ project_root = Path(__file__).resolve().parents[2]
 sys.path.append(str(project_root))
 
 # Import shared database models
-from backend.shared_database.models import Base, Bike, BikeImage, CartItem, Order, OrderItem, User
+from backend.shared_database.models import (
+    Base,
+    Bike,
+    BikeImage,
+    CartItem,
+    Order,
+    OrderItem,
+    User,
+)
 
 
 def load_config(file_path):
@@ -91,16 +99,8 @@ async def add_mock_data():
     ]
 
     mock_users = [
-        {
-            "username": "user1",
-            "password": "password1",
-            "email": "user1@example.com"
-        },
-        {
-            "username": "user2",
-            "password": "password2",
-            "email": "user2@example.com"
-        }
+        {"username": "user1", "password": "password1", "email": "user1@example.com"},
+        {"username": "user2", "password": "password2", "email": "user2@example.com"},
     ]
 
     async with AsyncSessionLocal() as session:
@@ -126,7 +126,7 @@ async def add_mock_data():
             user = User(
                 username=user_data["username"],
                 password=user_data["password"],
-                email=user_data["email"]
+                email=user_data["email"],
             )
             users.append(user)
 

@@ -34,6 +34,14 @@ async def add_to_cart(cart_item: CartItemCreate, db: AsyncSession = Depends(get_
     if not bike:
         raise HTTPException(status_code=404, detail="Bike not found")
 
+    # Check if the bike is already in the cart
+    existing_item = await db.execute(
+        select(CartItem).where(CartItem.bike_id == cart_item.bike_id)
+    )
+    existing_item = existing_item.scalar_one_or_none()
+    if existing_item:
+        raise HTTPException(status_code=400, detail="This item is already in the cart")
+
     new_cart_item = CartItem(bike_id=cart_item.bike_id, quantity=cart_item.quantity)
     db.add(new_cart_item)
     await db.commit()

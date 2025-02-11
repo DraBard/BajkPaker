@@ -21,18 +21,15 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = async (bike) => {
     try {
+      const existingItem = cart.find((item) => item.bike_id === bike.id);
+      if (existingItem) {
+        alert('This item is already in the cart.');
+        return;
+      }
+
       const cartItem = { bike_id: bike.id, quantity: 1 };
       const newCartItem = await apiAddToCart(cartItem);
-      setCart((prevCart) => {
-        const existingItem = prevCart.find((item) => item.bike_id === newCartItem.bike_id);
-        if (existingItem) {
-          return prevCart.map((item) =>
-            item.bike_id === newCartItem.bike_id ? { ...item, quantity: item.quantity + 1 } : item
-          );
-        } else {
-          return [...prevCart, newCartItem];
-        }
-      });
+      setCart((prevCart) => [...prevCart, newCartItem]);
     } catch (error) {
       console.error('Failed to add to cart:', error);
     }

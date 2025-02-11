@@ -66,11 +66,15 @@ const BikePage = () => {
   }, [bikeId]);
 
   const handleAddToCart = async () => {
+    if (addedToCart) {
+      alert('This item is already in the cart.');
+      return;
+    }
+
     setIsLoading(true);
     try {
       await addToCart(bike);
       setAddedToCart(true);
-      alert('Bike added to cart successfully!');
     } catch (error) {
       console.error('Failed to add to cart:', error);
       setError('Failed to add bike to cart');

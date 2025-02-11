@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaShoppingCart, FaHome, FaStore, FaInfoCircle, FaEnvelope, FaRecycle, FaUserPlus, FaSignInAlt } from 'react-icons/fa';
+import { FaShoppingCart, FaHome, FaStore, FaInfoCircle, FaEnvelope, FaRecycle, FaUserPlus } from 'react-icons/fa';
+import { CartContext } from '../CartContext';
 
 const NavBar = styled.nav`
   background-color: ${props => props.theme.colors.light};
@@ -57,21 +58,47 @@ const NavLink = styled(Link)`
   }
 `;
 
-const Header = () => (
-  <NavBar>
-    <NavContent>
-      <Logo to="/">BajkPaker</Logo>
-      <NavLinks>
-        <NavLink to="/"><FaHome /> Home</NavLink>
-        <NavLink to="/shop"><FaStore /> Shop</NavLink>
-        <NavLink to="/revived"><FaRecycle /> Revived</NavLink>
-        <NavLink to="/cart"><FaShoppingCart /> Cart</NavLink>
-        <NavLink to="/about"><FaInfoCircle /> About</NavLink>
-        <NavLink to="/contact"><FaEnvelope /> Contact</NavLink>
-        <NavLink to="/user"><FaUserPlus /> Register/Log in</NavLink>
-      </NavLinks>
-    </NavContent>
-  </NavBar>
-);
+const CartIconContainer = styled.div`
+  position: relative;
+`;
+
+const CartBadge = styled.span`
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+`;
+
+const Header = () => {
+  const { cart } = useContext(CartContext);
+  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+
+  return (
+    <NavBar>
+      <NavContent>
+        <Logo to="/">BajkPaker</Logo>
+        <NavLinks>
+          <NavLink to="/"><FaHome /> Home</NavLink>
+          <NavLink to="/shop"><FaStore /> Shop</NavLink>
+          <NavLink to="/revived"><FaRecycle /> Revived</NavLink>
+          <NavLink to="/about"><FaInfoCircle /> About</NavLink>
+          <NavLink to="/contact"><FaEnvelope /> Contact</NavLink>
+          <CartIconContainer>
+            <NavLink to="/cart">
+              <FaShoppingCart /> Cart
+              {cartItemCount > 0 && <CartBadge>{cartItemCount}</CartBadge>}
+            </NavLink>
+          </CartIconContainer>
+          <NavLink to="/user"><FaUserPlus /> Register/Log in</NavLink>
+        </NavLinks>
+      </NavContent>
+    </NavBar>
+  );
+};
 
 export default Header;

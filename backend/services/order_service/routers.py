@@ -21,6 +21,8 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 
 from pydantic import BaseModel
+
+
 class CheckoutSessionRequest(BaseModel):
     order_id: int
 
@@ -101,7 +103,7 @@ async def create_order(order: OrderCreate, db: AsyncSession = Depends(get_db)):
 @router.post("/api/payments/create-checkout-session")
 async def create_checkout_session(
     request: CheckoutSessionRequest,  # Proper request model
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     print(f"Received request with order_id: {request.order_id}")  # Log the request data
     order_id = request.order_id

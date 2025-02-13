@@ -45,9 +45,8 @@ export const loginUser = async (userData) => {
 };
 
 export async function createCheckoutSession(orderId) {
-  const response = await fetch(`/api/payments/create-checkout-session?order_id=${orderId}`, {
-    method: 'POST',
+  const response = await axios.post(`${ORDER_API_URL}/payments/create-checkout-session`, {
+    order_id: orderId,
   });
-  const data = await response.json();
-  return data.checkoutUrl;
+  return response.data.checkoutUrl; // Access the data directly
 }

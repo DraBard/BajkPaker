@@ -20,6 +20,11 @@ router = APIRouter()
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 
+from pydantic import BaseModel
+class CheckoutSessionRequest(BaseModel):
+    order_id: int
+
+
 @router.get("/api/cart", response_model=list[CartItemOut])
 async def get_cart(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(CartItem).options(selectinload(CartItem.bike)))
@@ -94,8 +99,12 @@ async def create_order(order: OrderCreate, db: AsyncSession = Depends(get_db)):
 
 # Stripe payment
 @router.post("/api/payments/create-checkout-session")
-async def create_checkout_session(order_id: int, db: AsyncSession = Depends(get_db)):
-    # Fetch order
+async def create_checkout_session(
+    request: CheckoutSessionRequest,  # Proper request model
+    db: AsyncSession = Depends(get_db)
+):
+    print(f"Received request with order_id: {request.order_id}")  # Log the request data
+    order_id = request.order_id
     result = await db.execute(select(Order).where(Order.id == order_id))
     order = result.scalar_one_or_none()
     if not order:

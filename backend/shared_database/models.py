@@ -30,6 +30,7 @@ class CartItem(Base):
     id = Column(Integer, primary_key=True, index=True)
     bike_id = Column(Integer, ForeignKey("bikes.id"))
     quantity = Column(Integer, nullable=False)
+    session_id = Column(String(255), nullable=False)  # NEW: session identifier
     bike = relationship("Bike", back_populates="cart_items")
 
 

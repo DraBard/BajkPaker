@@ -15,22 +15,22 @@ export const fetchBike = async (bikeId) => {
 };
 
 export const addToCart = async (cartItem) => {
-  const response = await axios.post(`${ORDER_API_URL}/cart`, cartItem);
+  const response = await axios.post(`${ORDER_API_URL}/cart`, cartItem, { withCredentials: true });
   return response.data;
 };
 
 export const fetchCart = async () => {
-  const response = await axios.get(`${ORDER_API_URL}/cart`);
+  const response = await axios.get(`${ORDER_API_URL}/cart`, { withCredentials: true });
   return response.data;
 };
 
 export const removeFromCart = async (cartItemId) => {
-  const response = await axios.delete(`${ORDER_API_URL}/cart/${cartItemId}`);
+  const response = await axios.delete(`${ORDER_API_URL}/cart/${cartItemId}`, { withCredentials: true });
   return response.data;
 };
 
 export const createOrder = async (order) => {
-  const response = await axios.post(`${ORDER_API_URL}/orders`, order);
+  const response = await axios.post(`${ORDER_API_URL}/orders`, order, { withCredentials: true });
   return response.data;
 };
 
@@ -47,6 +47,6 @@ export const loginUser = async (userData) => {
 export async function createCheckoutSession(orderId) {
   const response = await axios.post(`${ORDER_API_URL}/payments/create-checkout-session`, {
     order_id: orderId,
-  });
+  }, { withCredentials: true });
   return response.data.checkoutUrl; // Access the data directly
 }

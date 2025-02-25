@@ -37,17 +37,26 @@ def get_session_id(request: Request, response: Response) -> str:
 
 
 @router.get("/api/cart", response_model=list[CartItemOut])
-async def get_cart(request: Request, response: Response, db: AsyncSession = Depends(get_db)):
+async def get_cart(
+    request: Request, response: Response, db: AsyncSession = Depends(get_db)
+):
     session_id = get_session_id(request, response)
     result = await db.execute(
-        select(CartItem).where(CartItem.session_id == session_id).options(selectinload(CartItem.bike))
+        select(CartItem)
+        .where(CartItem.session_id == session_id)
+        .options(selectinload(CartItem.bike))
     )
     cart_items = result.scalars().all()
     return cart_items
 
 
 @router.post("/api/cart", response_model=CartItemOut)
-async def add_to_cart(cart_item: CartItemCreate, request: Request, response: Response, db: AsyncSession = Depends(get_db)):
+async def add_to_cart(
+    cart_item: CartItemCreate,
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
     session_id = get_session_id(request, response)
     bike = await db.get(Bike, cart_item.bike_id)
     if not bike:
@@ -56,14 +65,15 @@ async def add_to_cart(cart_item: CartItemCreate, request: Request, response: Res
     # Check if already in session cart
     existing = await db.execute(
         select(CartItem).where(
-            CartItem.bike_id == cart_item.bike_id,
-            CartItem.session_id == session_id
+            CartItem.bike_id == cart_item.bike_id, CartItem.session_id == session_id
         )
     )
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="This item is already in the cart")
 
-    new_item = CartItem(bike_id=cart_item.bike_id, quantity=cart_item.quantity, session_id=session_id)
+    new_item = CartItem(
+        bike_id=cart_item.bike_id, quantity=cart_item.quantity, session_id=session_id
+    )
     db.add(new_item)
     await db.commit()
     await db.refresh(new_item, attribute_names=["bike"])
@@ -71,15 +81,22 @@ async def add_to_cart(cart_item: CartItemCreate, request: Request, response: Res
 
 
 @router.delete("/api/cart/{item_id}")
-async def remove_from_cart(item_id: int, request: Request, response: Response, db: AsyncSession = Depends(get_db)):
+async def remove_from_cart(
+    item_id: int,
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
     session_id = get_session_id(request, response)
     result = await db.execute(
-        select(CartItem).where(CartItem.id == item_id, CartItem.session_id == session_id)
+        select(CartItem).where(
+            CartItem.id == item_id, CartItem.session_id == session_id
+        )
     )
     item = result.scalar_one_or_none()
     if not item:
         raise HTTPException(status_code=404, detail="Cart item not found")
-    
+
     bike = await db.get(Bike, item.bike_id)
     if bike:
         bike.bought = False

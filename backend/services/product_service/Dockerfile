@@ -6,14 +6,11 @@ RUN apt-get update && apt-get install -y gcc libmariadb-dev && rm -rf /var/lib/a
 WORKDIR /app
 
 # Copy the requirements file and install dependencies
-COPY services/product_service/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the service code
-COPY services/product_service /app
-
-# Copy the shared database code and config file
-COPY shared_database /app/shared_database
+COPY . /app
 
 # Expose the service port
 EXPOSE 8001

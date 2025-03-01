@@ -4,10 +4,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 import sys
-from pathlib import Path
-from schemas import OrderCreate, OrderOut, CartItemCreate, CartItemOut
 import os
 import uuid
+from pathlib import Path
+from schemas import OrderCreate, OrderOut, CartItemCreate, CartItemOut
+import logging
+logger = logging.getLogger(__name__)    
 
 try:
     from shared_database.models import Order, OrderItem, CartItem, Bike
@@ -108,6 +110,7 @@ async def remove_from_cart(
 
 @router.post("/api/orders", response_model=OrderOut)
 async def create_order(order: OrderCreate, db: AsyncSession = Depends(get_db)):
+    logger.info("Creating order with total_price: %s", order.total_price)
     new_order = Order(total_price=order.total_price)
     db.add(new_order)
     await db.commit()
@@ -116,16 +119,16 @@ async def create_order(order: OrderCreate, db: AsyncSession = Depends(get_db)):
     for item in order.items:
         bike = await db.get(Bike, item.bike_id)
         if not bike:
+            logger.error("Bike with id %s not found for order", item.bike_id)
             raise HTTPException(status_code=404, detail="Bike not found")
-
         new_order_item = OrderItem(
             order_id=new_order.id, bike_id=item.bike_id, quantity=item.quantity
         )
         db.add(new_order_item)
         bike.bought = True
-
     await db.commit()
-
+    
+    logger.info("Order %s created successfully", new_order.id)
     # Eagerly load related items
     result = await db.execute(
         select(Order).where(Order.id == new_order.id).options(selectinload(Order.items))
@@ -141,7 +144,7 @@ async def create_checkout_session(
     request: CheckoutSessionRequest,  # Proper request model
     db: AsyncSession = Depends(get_db),
 ):
-    print(f"Received request with order_id: {request.order_id}")  # Log the request data
+    logger.info(f"Received request with order_id: {request.order_id}")  # Log the request data
     order_id = request.order_id
     result = await db.execute(select(Order).where(Order.id == order_id))
     order = result.scalar_one_or_none()

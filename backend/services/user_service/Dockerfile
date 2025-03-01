@@ -15,7 +15,6 @@ COPY services/product_service /app
 # Copy the shared database code and config file
 COPY shared_database /app/shared_database
 
-
 # Expose the service port
 EXPOSE 8003
 

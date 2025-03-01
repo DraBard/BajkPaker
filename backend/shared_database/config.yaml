@@ -7,6 +7,6 @@ local:
     url: mysql+asyncmy://root:${DB_PASSWORD}@localhost/bajkpaker_prod
 deployment:
   database_dev:
-    url: mysql+asyncmy://root:${DB_PASSWORD}@/bajkpaker_dev?unix_socket=/cloudsql/bajkpaker:europe-central2:bajkpaker-db
+    url: mysql+asyncmy://root:${DB_PASSWORD}@bajkpaker-mysql.fly.dev/bajkpaker_dev
   database_prod:
-    url: mysql+asyncmy://root:${DB_PASSWORD}@/bajkpaker_prod?unix_socket=/cloudsql/bajkpaker:europe-central2:bajkpaker-db
+    url: mysql+asyncmy://root:${DB_PASSWORD}@bajkpaker-mysql.fly.dev/bajkpaker_prod

@@ -1,0 +1,25 @@
+# fly.toml app configuration file generated for bajkpaker-mysql on 2025-03-01T22:14:52+01:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'bajkpaker-mysql'
+primary_region = 'waw'
+
+[build]
+  image = 'mysql:8'
+
+[env]
+  MYSQL_DATABASE = 'bajkpaker_dev'
+  MYSQL_ROOT_PASSWORD = 'PLACEHOLDER'
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 3306
+
+  [[services.ports]]
+    port = 3306
+    handlers = ['http']
+
+[[vm]]
+  size = 'shared-cpu-1x'

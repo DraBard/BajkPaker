@@ -168,8 +168,8 @@ async def create_checkout_session(
             }
         ],
         mode="payment",
-        success_url="http://localhost:3000/payment-success",
-        cancel_url="http://localhost:3000/payment-cancel",
+        success_url="https://bajkpaker.fly.dev:3000/payment-success",
+        cancel_url="https://bajkpaker.fly.dev:3000/payment-cancel",
     )
     return {"checkoutUrl": session.url}
 

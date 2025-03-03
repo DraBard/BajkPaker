@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const PRODUCT_API_URL = 'http://localhost:8001/api';  // Updated port to 8001
-const ORDER_API_URL = 'http://localhost:8002/api';    // Updated port to 8002
+const PRODUCT_API_URL = 'https://product-service.fly.dev:8001/api';  // Updated port to 8001
+const ORDER_API_URL = 'https://order-service.fly.dev:8002/api';    // Updated port to 8002
 const USER_API_URL = 'http://localhost:8003/api';
 
 export const fetchBikes = async () => {

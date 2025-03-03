@@ -67,7 +67,7 @@ const RevivedPage = () => {
   return (
     <RevivedContainer>
       <ProductCard>
-        <img src={mainImage ? `http://localhost:8001${mainImage.image_url}` : '/path/to/default-image.jpg'} alt={bike.name} />
+        <img src={mainImage ? `https://product-service.fly.dev:8001${mainImage.image_url}` : '/path/to/default-image.jpg'} alt={bike.name} />
         <h3>{bike.name}</h3>
         <p>${bike.price}</p>
       </ProductCard>

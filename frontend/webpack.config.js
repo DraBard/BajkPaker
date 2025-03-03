@@ -18,12 +18,12 @@ module.exports = {
     proxy: [
       {
         context: ['/api'], // Requests to '/api' go to service 1
-        target: 'http://localhost:8001',
+        target: 'https://product-service.fly.dev:8001',
         changeOrigin: true,
       },
       {
         context: ['/api'], // Requests to '/auth' go to service 2
-        target: 'http://localhost:8002',
+        target: 'https://order-service.fly.dev:8002',
         changeOrigin: true,
       },
     ],

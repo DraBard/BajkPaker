@@ -112,7 +112,7 @@ const BikePage = () => {
       {bike.images.map((image) => (
         <BikeImage 
           key={image.id} 
-          src={`http://localhost:8001${image.image_url}`} 
+          src={`https://product-service.fly.dev:8001${image.image_url}`} 
           alt={bike.name} 
         />
       ))}

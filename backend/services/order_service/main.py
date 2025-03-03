@@ -8,7 +8,9 @@ app = FastAPI()
 # Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://bajkpaker.fly.dev:3000"],  # Adjust this to your frontend URL
+    allow_origins=[
+        "https://bajkpaker.fly.dev:3000"
+    ],  # Adjust this to your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

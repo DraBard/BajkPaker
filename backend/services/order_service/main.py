@@ -2,13 +2,18 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import router as order_router
 import uvicorn
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = FastAPI()
 
 # Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://bajkpaker.fly.dev"],  # Adjust this to your frontend URL
+    allow_origins=[os.getenv("FRONTEND_URL", "https://bajkpaker.fly.dev")],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

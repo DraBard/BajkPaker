@@ -42,32 +42,58 @@ const ProductCard = styled.div`
 
 const RevivedPage = () => {
   const [bike, setBike] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const getBikes = async () => {
       try {
+        setIsLoading(true);
         const data = await fetchBikes();
         if (data.length > 0) {
           setBike(data[0]);
         }
       } catch (error) {
         console.error('Failed to fetch bikes:', error);
+        setError('Failed to load revived bike. Please try again later.');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     getBikes();
   }, []);
 
+  if (isLoading) {
+    return <p>Loading revived bike...</p>;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
   if (!bike) {
     return <p>No bike available in the revived section.</p>;
   }
 
   const mainImage = bike.images.find(image => image.is_main);
+  
+  // Helper function to generate correct image URLs
+  const getImageUrl = (imagePath) => {
+    // Remove any port number from the URL and handle relative paths
+    return imagePath.startsWith('http') 
+      ? imagePath 
+      : `https://product-service.fly.dev${imagePath}`;
+  };
+
+  const imageUrl = mainImage 
+    ? getImageUrl(mainImage.image_url)
+    : '/path/to/default-image.jpg';
 
   return (
     <RevivedContainer>
       <ProductCard>
-        <img src={mainImage ? `https://product-service.fly.dev:8001${mainImage.image_url}` : '/path/to/default-image.jpg'} alt={bike.name} />
+        <img src={imageUrl} alt={bike.name} />
         <h3>{bike.name}</h3>
         <p>${bike.price}</p>
       </ProductCard>

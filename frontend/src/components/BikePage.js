@@ -83,6 +83,14 @@ const BikePage = () => {
     }
   };
 
+  // Helper function to generate correct image URLs
+  const getImageUrl = (imagePath) => {
+    // Remove any port number from the URL and handle relative paths
+    return imagePath.startsWith('http') 
+      ? imagePath 
+      : `https://product-service.fly.dev${imagePath}`;
+  };
+
   if (error) {
     return <p>{error}</p>;
   }
@@ -112,7 +120,7 @@ const BikePage = () => {
       {bike.images.map((image) => (
         <BikeImage 
           key={image.id} 
-          src={`https://product-service.fly.dev:8001${image.image_url}`} 
+          src={getImageUrl(image.image_url)} 
           alt={bike.name} 
         />
       ))}

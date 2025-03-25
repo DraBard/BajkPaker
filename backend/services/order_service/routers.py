@@ -9,16 +9,17 @@ import uuid
 from pathlib import Path
 from schemas import OrderCreate, OrderOut, CartItemCreate, CartItemOut
 import logging
-
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)    
 
 try:
-    from shared_database.models import Order, OrderItem, CartItem, Bike
-    from shared_database.database import get_db
-except ImportError:
+    # Updated import path to use the shared database properly
     sys.path.append(str(Path(__file__).resolve().parents[2]))
-    from shared_database.models import Order, OrderItem, CartItem, Bike
-    from shared_database.database import get_db
+    from backend.database.models import Order, OrderItem, CartItem, Bike
+    from backend.database.client import get_db
+except ImportError:
+    sys.path.append(str(Path(__file__).resolve().parents[3]))
+    from backend.database.models import Order, OrderItem, CartItem, Bike
+    from backend.database.client import get_db
 
 router = APIRouter()
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
@@ -128,7 +129,7 @@ async def create_order(order: OrderCreate, db: AsyncSession = Depends(get_db)):
         db.add(new_order_item)
         bike.bought = True
     await db.commit()
-
+    
     logger.info("Order %s created successfully", new_order.id)
     # Eagerly load related items
     result = await db.execute(
@@ -145,9 +146,7 @@ async def create_checkout_session(
     request: CheckoutSessionRequest,  # Proper request model
     db: AsyncSession = Depends(get_db),
 ):
-    logger.info(
-        f"Received request with order_id: {request.order_id}"
-    )  # Log the request data
+    logger.info(f"Received request with order_id: {request.order_id}")  # Log the request data
     order_id = request.order_id
     result = await db.execute(select(Order).where(Order.id == order_id))
     order = result.scalar_one_or_none()
@@ -168,8 +167,8 @@ async def create_checkout_session(
             }
         ],
         mode="payment",
-        success_url="https://bajkpaker.fly.dev:3000/payment-success",
-        cancel_url="https://bajkpaker.fly.dev:3000/payment-cancel",
+        success_url="http://localhost:3000/payment-success",
+        cancel_url="http://localhost:3000/payment-cancel",
     )
     return {"checkoutUrl": session.url}
 

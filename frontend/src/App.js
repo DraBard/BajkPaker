@@ -10,7 +10,7 @@ import ContactPage from './components/ContactPage';
 import BikePage from './components/BikePage';
 import CartPage from './components/CartPage';
 import RevivedPage from './components/RevivedPage';
-import UserPage from './components/UserPage';
+import UserAuthPage from './components/UserAuthPage';
 import GlobalStyle from './styles/GlobalStyle';
 import theme from './styles/theme';
 import { CartProvider } from './CartContext';
@@ -28,9 +28,9 @@ function App() {
             <Route path="/shop/:bikeId" element={<BikePage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/revived" element={<RevivedPage />} />
-            <Route path="/user" element={<UserPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/auth" element={<UserAuthPage />} />
             <Route path="/payment-success" element={<h1>Payment Successful!</h1>} />
             <Route path="/payment-cancel" element={<h1>Payment Canceled</h1>} />
           </Routes>

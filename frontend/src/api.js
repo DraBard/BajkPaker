@@ -1,16 +1,41 @@
 import axios from 'axios';
 
-const PRODUCT_API_URL = 'https://product-service.fly.dev:8001/api';  // Updated port to 8001
-const ORDER_API_URL = 'https://order-service.fly.dev:8002/api';    // Updated port to 8002
-const USER_API_URL = 'http://localhost:8003/api';
+// Define API URLs based on environment
+const isProduction = process.env.NODE_ENV === 'production';
+
+const PRODUCT_API_URL = isProduction
+  ? 'https://product-service.fly.dev/api'
+  : 'http://localhost:8001/api';
+
+const ORDER_API_URL = isProduction
+  ? 'https://order-service.fly.dev/api'
+  : 'http://localhost:8002/api';
+
+const USER_API_URL = isProduction
+  ? 'https://user-service.fly.dev/api'
+  : 'http://localhost:8003/api';
+
+// Set up axios defaults for cookies
+axios.defaults.withCredentials = true;
+
+// Add console logging for debugging in production
+const logRequest = (url) => {
+  if (isProduction) {
+    console.log(`Making API request to: ${url}`);
+  }
+};
 
 export const fetchBikes = async () => {
-  const response = await axios.get(`${PRODUCT_API_URL}/bikes`);
+  const url = `${PRODUCT_API_URL}/bikes`;
+  logRequest(url);
+  const response = await axios.get(url);
   return response.data;
 };
 
 export const fetchBike = async (bikeId) => {
-  const response = await axios.get(`${PRODUCT_API_URL}/bikes/${bikeId}`);
+  const url = `${PRODUCT_API_URL}/bikes/${bikeId}`;
+  logRequest(url);
+  const response = await axios.get(url);
   return response.data;
 };
 

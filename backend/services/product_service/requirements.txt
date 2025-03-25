@@ -5,3 +5,4 @@ asyncmy
 sqlalchemy[asyncio]
 pydantic
 PyYAML
+cryptography

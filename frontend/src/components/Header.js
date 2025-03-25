@@ -94,7 +94,7 @@ const Header = () => {
               {cartItemCount > 0 && <CartBadge>{cartItemCount}</CartBadge>}
             </NavLink>
           </CartIconContainer>
-          {/* <NavLink to="/user"><FaUserPlus /> Register/Log in</NavLink> */}
+          <NavLink to="/auth"><FaUserPlus /> Login</NavLink>
         </NavLinks>
       </NavContent>
     </NavBar>

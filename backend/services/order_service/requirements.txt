@@ -4,5 +4,4 @@ sqlalchemy
 asyncmy
 sqlalchemy[asyncio]
 pydantic
-PyYAML
 stripe

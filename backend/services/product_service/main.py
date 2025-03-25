@@ -1,15 +1,28 @@
-import uvicorn
+import sys
+from pathlib import Path
+import os
+
+# Add the backend directory to the path so imports work correctly
+backend_dir = Path(__file__).parent.parent.parent
+sys.path.append(str(backend_dir))
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import router as product_router
-from fastapi.staticfiles import StaticFiles
-import os
 
-app = FastAPI()
+app = FastAPI(title="Product Service")
+
+# Get allowed origins from env or use default values
+allowed_origins = os.getenv(
+    "ALLOWED_ORIGINS", 
+    "https://bajkpaker.fly.dev"
+).split(",")
+
+print("DEBUG ALLOWED_ORIGINS:", allowed_origins)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://bajkpaker.fly.dev"],  # Adjust this to your frontend URL
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -18,4 +31,5 @@ app.add_middleware(
 app.include_router(product_router)
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8001, reload=True)
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001)

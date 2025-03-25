@@ -1,19 +1,27 @@
-FROM python:3.10-slim
+FROM python:3.10-slim-buster
 
-# Install build tools and dependencies
-RUN apt-get update && apt-get install -y gcc libmariadb-dev && rm -rf /var/lib/apt/lists/*
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libmariadb-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
+# Set working directory
 WORKDIR /app
 
-# Copy the requirements file and install dependencies
+# Copy requirements and install
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the service code
-COPY . /app
+# Copy application code
+COPY . .
 
-# Expose the service port
+# Copy shared database code (assuming this repository structure)
+COPY ../../../backend/shared_database /app/backend/shared_database
+
+# Expose port
 EXPOSE 8002
 
-# Command to run the application
+# Run application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]

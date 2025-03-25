@@ -25,6 +25,7 @@ from backend.database.models import (
     BikeImage,
     User,
 )
+
 print("Database models imported successfully")
 
 # Database connection parameters
@@ -45,6 +46,7 @@ if not DB_PASSWORD:
     print("Error: DB_PASSWORD environment variable is not set")
     sys.exit(1)
 
+
 # Check if the port is reachable before proceeding
 def check_port(host, port, timeout=5):
     print(f"Testing connection to {host}:{port} (timeout: {timeout}s)...")
@@ -64,6 +66,7 @@ def check_port(host, port, timeout=5):
         return False
     finally:
         sock.close()
+
 
 # Build the database URL
 print(f"Testing database connection before proceeding...")
@@ -89,14 +92,14 @@ print("- pool_pre_ping: True (verify connections before use)")
 print("- connect_args: {'connect_timeout': 10} (connection timeout)")
 
 engine = create_async_engine(
-    DATABASE_URL, 
+    DATABASE_URL,
     echo=True,
     pool_recycle=60,  # Recycle connections more frequently
-    pool_timeout=10,  # Shorter timeout 
-    pool_pre_ping=True, # Check connection before use
+    pool_timeout=10,  # Shorter timeout
+    pool_pre_ping=True,  # Check connection before use
     connect_args={
         "connect_timeout": 10,  # MySQL connection timeout in seconds
-    }
+    },
 )
 print("Database engine created")
 
@@ -124,18 +127,18 @@ async def create_tables():
     try:
         print(f"Connecting to database at {DB_HOST}:{DB_PORT}...")
         print("Attempting to create tables if they don't exist...")
-        
+
         # First try a simple ping to verify connection
         if not await ping_database():
             print("Initial connection test failed. Cannot proceed with table creation.")
             raise ConnectionError("Cannot establish database connection")
-            
+
         async with engine.begin() as conn:
             print("Database connection established")
             print("Creating tables...")
             await conn.run_sync(Base.metadata.create_all)
             print("Tables created successfully")
-            
+
             # List created tables
             result = await conn.execute(text("SHOW TABLES"))
             tables = result.fetchall()
@@ -156,13 +159,13 @@ async def check_existing_data():
             result = await session.execute(text("SELECT COUNT(*) FROM bikes"))
             bike_count = result.scalar()
             print(f"Found {bike_count} existing bikes in the database")
-            
+
             if bike_count > 0:
                 print("Getting sample of existing bike names...")
                 result = await session.execute(text("SELECT name FROM bikes LIMIT 3"))
                 sample_bikes = result.fetchall()
                 print(f"Sample bike names: {[bike[0] for bike in sample_bikes]}")
-                
+
             return bike_count
     except Exception as e:
         print(f"Error checking existing data: {e}")
@@ -183,7 +186,7 @@ async def add_mock_data():
     # Define mock data
     print("Preparing mock data for insertion...")
     description1 = "Elegancki Rower dla Konesera Porto\n\nOddaj się wyrafinowaniu tego niezwykłego roweru, stworzonego z myślą o wymagającym koneserze wina Porto. Jego eleganckie linie i design inspirowany stylem vintage oddają istotę klasy i wyrafinowania. Głęboka burgundowa rama nawiązuje do bogatych odcieni najlepszego Porto, a luksusowe skórzane siodełko i uchwyty kierownicy dodają ponadczasowego charakteru.\n\nIdealny na spokojne przejażdżki po winnicach lub brukowanych uliczkach Porto, ten rower łączy funkcjonalność z elegancją. Niezależnie od tego, czy przewozisz butelkę ulubionego rocznika, czy po prostu cieszysz się malowniczą przejażdżką, ten rower zapewnia płynną i stylową jazdę. To nie tylko środek transportu, ale także wyraz dobrego smaku i wyrafinowania."
-    
+
     mock_bikes = [
         {
             "name": "Porto",
@@ -192,8 +195,12 @@ async def add_mock_data():
             "bought": False,
             "images": [
                 {"image_url": "/static/images/PortoMain.jpg", "is_main": True},
-                {"image_url": "/static/images/WhatsApp Image 2024-10-01 at 10.24.06.jpeg"},
-                {"image_url": "/static/images/WhatsApp Image 2024-10-01 at 11.18.10 (1).jpeg"},
+                {
+                    "image_url": "/static/images/WhatsApp Image 2024-10-01 at 10.24.06.jpeg"
+                },
+                {
+                    "image_url": "/static/images/WhatsApp Image 2024-10-01 at 11.18.10 (1).jpeg"
+                },
             ],
         },
         {
@@ -233,7 +240,9 @@ async def add_mock_data():
 
     print(f"Prepared {len(mock_bikes)} bikes for insertion")
     for idx, bike in enumerate(mock_bikes, 1):
-        print(f"  Bike {idx}: {bike['name']} - ${bike['price']} with {len(bike['images'])} images")
+        print(
+            f"  Bike {idx}: {bike['name']} - ${bike['price']} with {len(bike['images'])} images"
+        )
 
     mock_users = [
         {"username": "user1", "password": "password1", "email": "user1@example.com"},
@@ -281,41 +290,44 @@ async def add_mock_data():
             # Add all objects to the session
             print(f"Adding {len(bikes)} bikes and {len(users)} users to session")
             session.add_all(bikes + users)
-            
+
             # Commit to the database
             print("Committing all data to database...")
             await session.commit()
             print("Data commit successful!")
-            print(f"Successfully added {len(bikes)} bikes and {len(users)} users to the database")
+            print(
+                f"Successfully added {len(bikes)} bikes and {len(users)} users to the database"
+            )
     except Exception as e:
         print(f"Error adding mock data: {e}")
         print(f"Error type: {type(e).__name__}")
         print(f"Error details: {str(e)}")
         print("Stack trace:")
         import traceback
+
         traceback.print_exc()
         raise
 
 
 async def main():
     """Main function to create tables and add mock data with retries"""
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("STARTING FLY.IO DATABASE INITIALIZATION")
-    print("="*50)
-    
+    print("=" * 50)
+
     print("\n⚠️  IMPORTANT CONNECTION NOTICE ⚠️")
     print("This script requires an active flyctl proxy tunnel.")
     print("If you haven't started one yet, please run:")
     print("   flyctl proxy 3306 -a bajkpaker-mysql")
     print("in a separate terminal window.")
-    print("="*50 + "\n")
-    
+    print("=" * 50 + "\n")
+
     max_retries = 3
     retry_delay = 5  # seconds
-    
+
     print(f"Maximum retry attempts: {max_retries}")
     print(f"Initial retry delay: {retry_delay} seconds (with exponential backoff)")
-    
+
     for attempt in range(1, max_retries + 1):
         try:
             print(f"\n{'='*20} ATTEMPT {attempt} OF {max_retries} {'='*20}")
@@ -324,32 +336,38 @@ async def main():
             await create_tables()
             print("Step 2: Adding mock data...")
             await add_mock_data()
-            print("\n" + "="*50)
+            print("\n" + "=" * 50)
             print("DATABASE SETUP COMPLETED SUCCESSFULLY!")
-            print("="*50)
+            print("=" * 50)
             return
         except Exception as e:
             print(f"\n{'!'*20} ATTEMPT {attempt} FAILED {'!'*20}")
             print(f"Error: {e}")
             print(f"Error type: {type(e).__name__}")
-            
+
             if attempt < max_retries:
                 print(f"Retrying in {retry_delay} seconds...")
                 time.sleep(retry_delay)
                 retry_delay *= 2  # Exponential backoff
                 print(f"Next retry delay increased to {retry_delay} seconds")
             else:
-                print("\n" + "="*50)
+                print("\n" + "=" * 50)
                 print("ALL ATTEMPTS FAILED")
-                print("="*50)
+                print("=" * 50)
                 print("\nPlease check your connection and credentials.")
                 print("\nTROUBLESHOOTING TIPS:")
                 print("1. Ensure you've started a flyctl tunnel:")
-                print("   Run in a separate terminal: flyctl proxy 3306 -a bajkpaker-mysql")
+                print(
+                    "   Run in a separate terminal: flyctl proxy 3306 -a bajkpaker-mysql"
+                )
                 print("   Keep that terminal open while running this script")
                 print("2. Verify your environment variables are correctly set:")
-                print(f"   - DB_HOST should be '127.0.0.1' when using flyctl proxy (current: {DB_HOST})")
-                print(f"   - DB_PORT should match the local port from flyctl proxy (current: {DB_PORT})")
+                print(
+                    f"   - DB_HOST should be '127.0.0.1' when using flyctl proxy (current: {DB_HOST})"
+                )
+                print(
+                    f"   - DB_PORT should match the local port from flyctl proxy (current: {DB_PORT})"
+                )
                 print("3. Check if the fly.io MySQL instance is running:")
                 print("   Run: fly status -a bajkpaker-mysql")
                 print("4. Examine the fly.io logs:")
@@ -364,7 +382,7 @@ async def main():
 if __name__ == "__main__":
     start_time = time.time()
     print(f"Script started at: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-    
+
     try:
         asyncio.run(main())
         end_time = time.time()
@@ -378,5 +396,6 @@ if __name__ == "__main__":
         print(f"\nUnhandled error: {e}")
         print("Stack trace:")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

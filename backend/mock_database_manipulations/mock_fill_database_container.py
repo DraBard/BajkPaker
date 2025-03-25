@@ -28,7 +28,9 @@ from backend.database.models import (
 # Database connection parameters for Docker container
 DB_USER = os.getenv("DB_USER", "bajkpaker")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "your_password")
-DB_HOST = os.getenv("DB_HOST", "localhost")  # Use localhost if connecting from host machine
+DB_HOST = os.getenv(
+    "DB_HOST", "localhost"
+)  # Use localhost if connecting from host machine
 DB_PORT = os.getenv("DB_PORT", "3306")  # Port exposed by the container
 DB_NAME = os.getenv("DB_NAME", "bajkpaker_dev")
 
@@ -116,9 +118,11 @@ async def add_mock_data():
             # Check if data already exists
             result = await session.execute(text("SELECT COUNT(*) FROM bikes"))
             bike_count = result.scalar()
-            
+
             if bike_count > 0:
-                print(f"Database already contains {bike_count} bikes. Skipping data insertion.")
+                print(
+                    f"Database already contains {bike_count} bikes. Skipping data insertion."
+                )
                 return
 
             bikes = []

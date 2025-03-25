@@ -6,7 +6,9 @@ from typing import AsyncGenerator
 # In production, these variables will come from Fly.io secrets/env
 DB_USER = os.getenv("DB_USER", "bajkpaker")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "your_password")
-DB_HOST = os.getenv("DB_HOST", "bajkpaker-mysql.internal")  # Will be bajkpaker-mysql.internal in prod
+DB_HOST = os.getenv(
+    "DB_HOST", "bajkpaker-mysql.internal"
+)  # Will be bajkpaker-mysql.internal in prod
 DB_PORT = os.getenv("DB_PORT", "3306")
 DB_NAME = os.getenv("DB_NAME", "bajkpaker_dev")
 DB_ECHO = os.getenv("DB_ECHO", "False").lower() == "true"
@@ -18,10 +20,7 @@ print("DATABASE_URL:", DATABASE_URL)
 
 # Create async engine
 engine = create_async_engine(
-    DATABASE_URL,
-    echo=DB_ECHO,
-    pool_pre_ping=True,
-    pool_recycle=300
+    DATABASE_URL, echo=DB_ECHO, pool_pre_ping=True, pool_recycle=300
 )
 
 # Create async session factory
@@ -30,8 +29,9 @@ AsyncSessionLocal = sessionmaker(
     autoflush=False,
     bind=engine,
     class_=AsyncSession,
-    expire_on_commit=False
+    expire_on_commit=False,
 )
+
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """

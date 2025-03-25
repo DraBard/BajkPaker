@@ -13,10 +13,7 @@ from routers import router as product_router
 app = FastAPI(title="Product Service")
 
 # Get allowed origins from env or use default values
-allowed_origins = os.getenv(
-    "ALLOWED_ORIGINS", 
-    "https://bajkpaker.fly.dev"
-).split(",")
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "https://bajkpaker.fly.dev").split(",")
 
 print("DEBUG ALLOWED_ORIGINS:", allowed_origins)
 
@@ -32,4 +29,5 @@ app.include_router(product_router)
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8001)

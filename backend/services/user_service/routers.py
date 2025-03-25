@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 from schemas import UserCreate, UserOut, UserLogin  # Create these schemas as needed
 import logging
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -50,7 +51,9 @@ async def read_user(user_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/api/users/login")
-async def login_user(user_input: UserLogin, request: Request, db: AsyncSession = Depends(get_db)):
+async def login_user(
+    user_input: UserLogin, request: Request, db: AsyncSession = Depends(get_db)
+):
     result = await db.execute(select(User).where(User.username == user_input.username))
     user = result.scalar_one_or_none()
     if not user or user.password != user_input.password:

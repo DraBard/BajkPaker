@@ -9,7 +9,8 @@ import uuid
 from pathlib import Path
 from schemas import OrderCreate, OrderOut, CartItemCreate, CartItemOut
 import logging
-logger = logging.getLogger(__name__)    
+
+logger = logging.getLogger(__name__)
 
 try:
     # Updated import path to use the shared database properly
@@ -129,7 +130,7 @@ async def create_order(order: OrderCreate, db: AsyncSession = Depends(get_db)):
         db.add(new_order_item)
         bike.bought = True
     await db.commit()
-    
+
     logger.info("Order %s created successfully", new_order.id)
     # Eagerly load related items
     result = await db.execute(
@@ -146,7 +147,9 @@ async def create_checkout_session(
     request: CheckoutSessionRequest,  # Proper request model
     db: AsyncSession = Depends(get_db),
 ):
-    logger.info(f"Received request with order_id: {request.order_id}")  # Log the request data
+    logger.info(
+        f"Received request with order_id: {request.order_id}"
+    )  # Log the request data
     order_id = request.order_id
     result = await db.execute(select(Order).where(Order.id == order_id))
     order = result.scalar_one_or_none()

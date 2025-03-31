@@ -1,0 +1,70 @@
+[
+  {
+    "bike_id": 1,
+    "bike_data": {
+      "name": "Porto - Mountain Bike",
+      "description": "A sturdy mountain bike ideal for off-road trails",
+      "price_per_day": 25.00,
+      "type": "mountain",
+      "size": "M",
+      "brand": "Porto",
+      "is_electric": false
+    },
+    "images": [
+      {"image_url": "/static/images/PortoMain.jpg", "is_main": true},
+      {"image_url": "/static/images/WhatsApp Image 2024-10-01 at 10.24.06.jpeg", "is_main": false},
+      {"image_url": "/static/images/WhatsApp Image 2024-10-01 at 11.18.10 (1).jpeg", "is_main": false}
+    ]
+  },
+  {
+    "bike_id": 2,
+    "bike_data": {
+      "name": "Road Racer Pro",
+      "description": "Lightweight road bike for speed enthusiasts",
+      "price_per_day": 30.00,
+      "type": "road",
+      "size": "L",
+      "brand": "Speedo",
+      "is_electric": false
+    },
+    "images": [
+      {"image_url": "/static/images/road-bike-main.jpg", "is_main": true},
+      {"image_url": "/static/images/road-bike-1.jpg", "is_main": false},
+      {"image_url": "/static/images/road-bike-2.jpg", "is_main": false}
+    ]
+  },
+  {
+    "bike_id": 3,
+    "bike_data": {
+      "name": "E-Rider 2000",
+      "description": "Electric bike with power assist for effortless riding",
+      "price_per_day": 40.00,
+      "type": "electric",
+      "size": "M",
+      "brand": "E-Rider",
+      "is_electric": true
+    },
+    "images": [
+      {"image_url": "/static/images/electric-bike-main.jpg", "is_main": true},
+      {"image_url": "/static/images/electric-bike-1.jpg", "is_main": false},
+      {"image_url": "/static/images/electric-bike-2.jpg", "is_main": false}
+    ]
+  },
+  {
+    "bike_id": 4,
+    "bike_data": {
+      "name": "Hybrid Explorer",
+      "description": "Versatile hybrid bike for city and light trails",
+      "price_per_day": 28.00,
+      "type": "hybrid",
+      "size": "S",
+      "brand": "Urban Trails",
+      "is_electric": false
+    },
+    "images": [
+      {"image_url": "/static/images/hybrid-bike-main.jpg", "is_main": true},
+      {"image_url": "/static/images/hybrid-bike-1.jpg", "is_main": false},
+      {"image_url": "/static/images/hybrid-bike-2.jpg", "is_main": false}
+    ]
+  }
+]

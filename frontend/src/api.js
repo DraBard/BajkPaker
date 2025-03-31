@@ -75,3 +75,21 @@ export async function createCheckoutSession(orderId) {
   }, { withCredentials: true });
   return response.data.checkoutUrl; // Access the data directly
 }
+
+export const uploadBikeImage = async (bikeId, imageFile, isMain = false) => {
+  const formData = new FormData();
+  formData.append('file', imageFile);
+  formData.append('is_main', isMain);
+  
+  const url = `${PRODUCT_API_URL}/bikes/${bikeId}/images`;
+  logRequest(url);
+  
+  const response = await axios.post(url, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    withCredentials: true,
+  });
+  
+  return response.data;
+};

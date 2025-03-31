@@ -80,10 +80,16 @@ const RevivedPage = () => {
   
   // Helper function to generate correct image URLs
   const getImageUrl = (imagePath) => {
-    // Remove any port number from the URL and handle relative paths
-    return imagePath.startsWith('http') 
-      ? imagePath 
-      : `https://product-service.fly.dev${imagePath}`;
+    if (!imagePath) return '/path/to/default-image.jpg';
+    
+    // For fully qualified URLs, use as-is
+    if (imagePath.startsWith('http')) return imagePath;
+    
+    // For relative paths, ensure they start with a slash
+    const path = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+    
+    // Use the backend service URL without port number
+    return `https://product-service.fly.dev${path}`;
   };
 
   const imageUrl = mainImage 

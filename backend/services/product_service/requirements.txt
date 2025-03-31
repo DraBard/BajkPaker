@@ -6,3 +6,5 @@ sqlalchemy[asyncio]
 pydantic
 PyYAML
 cryptography
+python-multipart
+aiofiles

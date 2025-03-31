@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for product-service on 2025-03-25T22:58:14+01:00
+# fly.toml app configuration file generated for product-service on 2025-03-31T21:04:54+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -17,6 +17,10 @@ primary_region = 'waw'
   DB_PORT = '3306'
   DB_USER = 'bajkpaker'
   ENVIRONMENT = 'production'
+
+[[mounts]]
+  source = 'product_images'
+  destination = '/app/static/images'
 
 [http_service]
   internal_port = 8001

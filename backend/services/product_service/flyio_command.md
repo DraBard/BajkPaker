@@ -25,3 +25,16 @@ docker build \
 docker run -d \
   -p 8001:8001 \
   product-service
+
+### After deployment
+Create volume to be able to store images etc.
+1. Create the Fly Volume:
+flyctl volumes create product_images --size 10 --region waw
+2. Check if the files are in the volume:
+fly ssh console -a product-service -C "ls -la /app/static/images"
+3. Upload images:
+bash upload_images_flyio.sh
+4. open proxy:
+flyctl proxy 3306 -a bajkpaker-mysql
+5. Run the metadata update script:
+python update_image_metadata.py image_metadata.json

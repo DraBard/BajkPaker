@@ -7,8 +7,7 @@ import mimetypes
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("product_service")
 
@@ -41,14 +40,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Add middleware to log request/response info for debugging
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     logger.info(f"Request path: {request.url.path}")
     logger.info(f"Request headers: {request.headers}")
-    
+
     response = await call_next(request)
-    
+
     logger.info(f"Response status code: {response.status_code}")
     logger.info(f"Response headers: {response.headers}")
     return response
@@ -64,10 +64,12 @@ app.mount("/static", StaticFiles(directory="static", html=False), name="static")
 
 app.include_router(product_router)
 
+
 @app.get("/healthz")
 async def health_check():
     """Health check endpoint for the proxy to verify service is running properly"""
     return {"status": "healthy"}
+
 
 @app.get("/debug/headers")
 async def debug_headers(request: Request):
@@ -86,8 +88,8 @@ async def debug_mime_types():
 if __name__ == "__main__":
     logger.info("Starting product service...")
     uvicorn.run(
-        app, 
-        host="0.0.0.0", 
+        app,
+        host="0.0.0.0",
         port=8001,
         log_level="info",
         proxy_headers=True,  # Important for handling proxy headers correctly

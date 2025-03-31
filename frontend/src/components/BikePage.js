@@ -23,6 +23,20 @@ const BikeImage = styled.img`
   box-shadow: ${(props) => props.theme.boxShadow};
 `;
 
+const FallbackImage = styled.div`
+  width: 100%;
+  height: 300px;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-style: italic;
+  margin: ${(props) => props.theme.spacing.small} 0;
+  border-radius: ${(props) => props.theme.borderRadius};
+  box-shadow: ${(props) => props.theme.boxShadow};
+`;
+
 const Description = styled.p`
   font-style: italic;
   color: ${(props) => props.color || props.theme.colors.text};
@@ -42,12 +56,15 @@ const AddToCartButton = styled.button`
   }
 `;
 
+const DEFAULT_IMAGE_PATH = '/placeholder-bike.jpg';
+
 const BikePage = () => {
   const { bikeId } = useParams();
   const [bike, setBike] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [imageErrors, setImageErrors] = useState({});
   const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
@@ -85,7 +102,7 @@ const BikePage = () => {
 
   // Helper function to generate correct image URLs
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return '/path/to/default-image.jpg';
+    if (!imagePath) return DEFAULT_IMAGE_PATH;
     
     // For fully qualified URLs, use as-is
     if (imagePath.startsWith('http')) return imagePath;
@@ -95,6 +112,14 @@ const BikePage = () => {
     
     // Use the backend service URL without port number
     return `https://product-service.fly.dev${path}`;
+  };
+  
+  const handleImageError = (imageId) => {
+    console.error(`Failed to load image ID: ${imageId}`);
+    setImageErrors(prev => ({
+      ...prev,
+      [imageId]: true
+    }));
   };
 
   if (error) {
@@ -124,11 +149,20 @@ const BikePage = () => {
         </Description>
       )}
       {bike.images.map((image) => (
-        <BikeImage 
-          key={image.id} 
-          src={getImageUrl(image.image_url)} 
-          alt={bike.name} 
-        />
+        imageErrors[image.id] ? (
+          <img
+            src={DEFAULT_IMAGE_PATH}
+            alt="placeholder"
+            style={{ width: '100%', height: '300px', objectFit: 'cover' }}
+          />
+        ) : (
+          <BikeImage 
+            key={image.id} 
+            src={getImageUrl(image.image_url)} 
+            alt={bike.name}
+            onError={() => handleImageError(image.id)}
+          />
+        )
       ))}
     </BikeContainer>
   );

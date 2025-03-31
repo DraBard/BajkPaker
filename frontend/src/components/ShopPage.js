@@ -39,10 +39,23 @@ const ProductCard = styled.div`
   }
 `;
 
+const FallbackImage = styled.div`
+  width: 100%;
+  height: 200px;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-style: italic;
+  margin-bottom: 10px;
+`;
+
 const ShopPage = () => {
   const [bikes, setBikes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [imageErrors, setImageErrors] = useState({});
 
   useEffect(() => {
     const getBikes = async () => {
@@ -83,8 +96,16 @@ const ShopPage = () => {
     // For relative paths, ensure they start with a slash
     const path = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
     
-    // Use the backend service URL without port number
-    return `https://product-service.fly.dev${path}`;
+    // Use the backend service URL without port number and add cache-busting
+    return `https://product-service.fly.dev${path}?t=${Date.now()}`;
+  };
+
+  const handleImageError = (bikeId) => {
+    console.error(`Failed to load image for bike ID: ${bikeId}`);
+    setImageErrors(prev => ({
+      ...prev,
+      [bikeId]: true
+    }));
   };
 
   return (
@@ -98,7 +119,15 @@ const ShopPage = () => {
         return (
           <Link to={`/shop/${bike.id}`} key={bike.id}>
             <ProductCard>
-              <img src={imageUrl} alt={bike.name} />
+              {imageErrors[bike.id] ? (
+                <FallbackImage>Image not available</FallbackImage>
+              ) : (
+                <img 
+                  src={imageUrl} 
+                  alt={bike.name} 
+                  onError={() => handleImageError(bike.id)}
+                />
+              )}
               <h3>{bike.name}</h3>
               <p>${bike.price}</p>
             </ProductCard>

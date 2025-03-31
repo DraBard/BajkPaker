@@ -40,10 +40,26 @@ const ProductCard = styled.div`
   }
 `;
 
+const FallbackImage = styled.div`
+  width: 100%;
+  height: 200px;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-style: italic;
+  margin-bottom: 10px;
+`;
+
+// Define a default fallback image path
+const DEFAULT_IMAGE_PATH = '/placeholder-bike.jpg';
+
 const RevivedPage = () => {
   const [bike, setBike] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const getBikes = async () => {
@@ -80,7 +96,7 @@ const RevivedPage = () => {
   
   // Helper function to generate correct image URLs
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return '/path/to/default-image.jpg';
+    if (!imagePath) return DEFAULT_IMAGE_PATH;
     
     // For fully qualified URLs, use as-is
     if (imagePath.startsWith('http')) return imagePath;
@@ -92,14 +108,27 @@ const RevivedPage = () => {
     return `https://product-service.fly.dev${path}`;
   };
 
+  const handleImageError = () => {
+    console.error(`Failed to load image for bike ID: ${bike.id}`);
+    setImageError(true);
+  };
+
   const imageUrl = mainImage 
     ? getImageUrl(mainImage.image_url)
-    : '/path/to/default-image.jpg';
+    : DEFAULT_IMAGE_PATH;
 
   return (
     <RevivedContainer>
       <ProductCard>
-        <img src={imageUrl} alt={bike.name} />
+        {imageError ? (
+          <FallbackImage>Image not available</FallbackImage>
+        ) : (
+          <img 
+            src={imageUrl} 
+            alt={bike.name} 
+            onError={handleImageError}
+          />
+        )}
         <h3>{bike.name}</h3>
         <p>${bike.price}</p>
       </ProductCard>

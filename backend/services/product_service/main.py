@@ -21,9 +21,9 @@ from fastapi.staticfiles import StaticFiles
 from routers import router as product_router
 
 # Ensure proper MIME types are registered for images
-mimetypes.add_type('image/jpeg', '.jpg')
-mimetypes.add_type('image/jpeg', '.jpeg')
-mimetypes.add_type('image/png', '.png')
+mimetypes.add_type("image/jpeg", ".jpg")
+mimetypes.add_type("image/jpeg", ".jpeg")
+mimetypes.add_type("image/png", ".png")
 
 app = FastAPI(title="Product Service")
 
@@ -53,11 +53,13 @@ async def log_requests(request: Request, call_next):
     logger.info(f"Response headers: {response.headers}")
     return response
 
+
 # Add debugging endpoint for image testing
 @app.get("/debug/test-image")
 async def test_image():
     """Test endpoint to verify image serving without browser interference"""
     return {"sample_image_url": "/static/images/PortoMain.jpg"}
+
 
 # Mount the static directory with explicit HTML mode disabled to ensure proper content types
 app.mount("/static", StaticFiles(directory="static", html=False), name="static")
@@ -76,14 +78,16 @@ async def debug_headers(request: Request):
     """Debug endpoint to see what headers are being received"""
     return {"headers": dict(request.headers)}
 
+
 @app.get("/debug/mime-types")
 async def debug_mime_types():
     """Debug endpoint to see registered MIME types for common image extensions"""
     return {
         "jpg": mimetypes.types_map.get(".jpg", "not registered"),
         "jpeg": mimetypes.types_map.get(".jpeg", "not registered"),
-        "png": mimetypes.types_map.get(".png", "not registered")
+        "png": mimetypes.types_map.get(".png", "not registered"),
     }
+
 
 if __name__ == "__main__":
     logger.info("Starting product service...")

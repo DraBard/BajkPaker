@@ -21,7 +21,10 @@ docker run -d \
   -e DB_ROOT_PASSWORD=BajkPaker93.83 \
   bajkpaker-mysql      
 
+  ### DEPLOYING
 
+  flyctl apps create bajkpaker-mysql
+  flyctl deploy --app bajkpaker-mysql
 
   #### To test connection on fly.io
 
@@ -29,6 +32,10 @@ docker run -d \
   Remember it has to be on separate terminal
 
   flyctl proxy 3306
+    # Correct proxy command syntax:
+  fly proxy 3306:3306 -a bajkpaker-mysql
+  # Or alternative format:
+  # flyctl proxy 3306:3306 --app bajkpaker-mysql
 
   Open new terminal and:
 

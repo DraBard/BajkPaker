@@ -9,11 +9,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 try:
-    from database.database import get_db
+    from database import get_db
     from database.models import User  # Add a “User” model in models.py
 except ImportError:
     sys.path.append(str(Path(__file__).resolve().parents[2]))
-    from database.database import get_db
+    from database import get_db
     from database.models import User
 
 

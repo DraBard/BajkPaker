@@ -83,18 +83,18 @@ const Header = () => {
       <NavContent>
         <Logo to="/">BajkPaker</Logo>
         <NavLinks>
-          <NavLink to="/"><FaHome /> Home</NavLink>
-          <NavLink to="/shop"><FaStore /> Shop</NavLink>
-          <NavLink to="/revived"><FaRecycle /> Revived</NavLink>
-          <NavLink to="/about"><FaInfoCircle /> About</NavLink>
-          <NavLink to="/contact"><FaEnvelope /> Contact</NavLink>
+          <NavLink to="/"><FaHome />Strona Główna</NavLink>
+          <NavLink to="/shop"><FaStore />Sklep</NavLink>
+          <NavLink to="/revived"><FaRecycle />Wskrzeszone</NavLink>
+          <NavLink to="/about"><FaInfoCircle />O nas</NavLink>
+          <NavLink to="/contact"><FaEnvelope />Kontakt</NavLink>
           <CartIconContainer>
             <NavLink to="/cart">
-              <FaShoppingCart /> Cart
+              <FaShoppingCart />Koszyk
               {cartItemCount > 0 && <CartBadge>{cartItemCount}</CartBadge>}
             </NavLink>
           </CartIconContainer>
-          <NavLink to="/auth"><FaUserPlus /> Login</NavLink>
+          {/* <NavLink to="/auth"><FaUserPlus /> Login</NavLink> */}
         </NavLinks>
       </NavContent>
     </NavBar>

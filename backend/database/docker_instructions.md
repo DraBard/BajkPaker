@@ -34,7 +34,7 @@ docker run -d \
 
   mysql -h 127.0.0.1 -P 3306 -u bajkpaker -p
 
-SHOW DATABASES;
-USE bajkpaker_dev;
-SHOW TABLES;
-DESC table_name;
+  SHOW DATABASES;
+  USE bajkpaker_dev;
+  SHOW TABLES;
+  DESC table_name;

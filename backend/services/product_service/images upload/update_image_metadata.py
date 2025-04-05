@@ -18,7 +18,7 @@ project_root = Path(__file__).resolve().parents[3]
 sys.path.append(str(project_root))
 
 # Import shared database models
-from backend.database.models import Bike, BikeImage
+from database.models import Bike, BikeImage
 
 # Database connection parameters
 DB_USER = os.getenv("DB_USER", "bajkpaker")
@@ -226,7 +226,7 @@ async def main():
         print("Usage: python update_image_metadata.py <metadata_file.json>")
         sys.exit(1)
 
-    metadata_file = sys.argv[1]
+    metadata_file = "image_metadata.json"
 
     # Ensure file path is correct
     if not os.path.exists(metadata_file):

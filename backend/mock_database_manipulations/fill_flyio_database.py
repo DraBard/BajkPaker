@@ -88,11 +88,11 @@ print(f"Database URL: mysql+asyncmy://{DB_USER}:****@{DB_HOST}:{DB_PORT}/{DB_NAM
 engine = create_async_engine(
     DATABASE_URL,
     echo=True,
-    pool_recycle=60,      # Recycle connections more frequently
-    pool_timeout=10,      # Shorter timeout
-    pool_pre_ping=True,   # Check connection before use
-    pool_size=2,          # Limit number of connections
-    max_overflow=3,       # Limit max overflow connections
+    pool_recycle=60,  # Recycle connections more frequently
+    pool_timeout=10,  # Shorter timeout
+    pool_pre_ping=True,  # Check connection before use
+    pool_size=2,  # Limit number of connections
+    max_overflow=3,  # Limit max overflow connections
     connect_args={
         "connect_timeout": 10,  # MySQL connection timeout in seconds
     },

@@ -1,0 +1,57 @@
+[mysqld]
+# Character set
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+
+# InnoDB settings - reduced buffer sizes
+innodb_buffer_pool_size=8M
+innodb_log_buffer_size=256K
+innodb_file_per_table=1
+innodb_flush_method=O_DIRECT
+innodb_flush_log_at_trx_commit=2
+innodb_log_file_size=4M
+
+# Connection settings - more aggressive limits
+max_connections=5
+max_connect_errors=5
+thread_cache_size=2
+thread_stack=128K
+
+# Completely disable query cache
+query_cache_size=0
+query_cache_type=0
+query_cache_limit=0
+
+# Temporary tables - reduced sizes
+tmp_table_size=512K
+max_heap_table_size=512K
+
+# Disable performance_schema (saves memory)
+performance_schema=OFF
+
+# Disable binary log
+skip-log-bin
+
+# Other memory settings - reduced buffers
+join_buffer_size=64K
+sort_buffer_size=64K
+read_buffer_size=64K
+read_rnd_buffer_size=64K
+key_buffer_size=4M
+
+# Disable unused features
+skip-name-resolve
+skip-host-cache
+
+# Transaction isolation (use READ-COMMITTED if suitable for your app)
+transaction_isolation=READ-COMMITTED
+
+# Table open cache - limit open tables
+table_open_cache=64
+table_definition_cache=64
+
+# Open file limits
+open_files_limit=64
+
+# Disable InnoDB doublewrite buffer (slight durability trade-off for performance)
+innodb_doublewrite=0

@@ -37,4 +37,4 @@ bash upload_images_flyio.sh
 4. open proxy:
 flyctl proxy 3306 -a bajkpaker-mysql
 5. Run the metadata update script:
-python update_image_metadata.py
+python update_image_metadata.py image_metadata.json

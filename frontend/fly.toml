@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for bajkpaker on 2025-04-05T18:29:49+02:00
+# fly.toml app configuration file generated for bajkpaker-patient-dream-6043 on 2025-04-06T15:19:19+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'bajkpaker'
+app = 'bajkpaker-patient-dream-6043'
 primary_region = 'waw'
 
 [build]

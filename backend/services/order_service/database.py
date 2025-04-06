@@ -10,17 +10,13 @@ logger = logging.getLogger(__name__)
 # In production, these variables will come from Fly.io secrets/env
 DB_USER = os.getenv("DB_USER", "bajkpaker")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "your_password")
-DB_HOST = os.getenv(
-    "DB_HOST", "bajkpaker-mysql.internal"
-)  # Will be bajkpaker-mysql.internal in prod
+DB_HOST = os.getenv("DB_HOST", "bajkpaker-mysql.internal")
 DB_PORT = os.getenv("DB_PORT", "3306")
 DB_NAME = os.getenv("DB_NAME", "bajkpaker_dev")
 DB_ECHO = os.getenv("DB_ECHO", "False").lower() == "true"
 
 # Build the database URL dynamically
 DATABASE_URL = f"mysql+asyncmy://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
-print("DATABASE_URL:", DATABASE_URL)
 
 # Create async engine with extremely optimized settings for very low memory
 engine = create_async_engine(
@@ -31,10 +27,8 @@ engine = create_async_engine(
     pool_size=1,      # Absolute minimum pool size
     max_overflow=1,   # Minimum overflow connections
     pool_timeout=20,  # Shorter timeout
-    # Additional options to reduce memory usage
     connect_args={
         "connect_timeout": 10,  # MySQL connection timeout in seconds
-        # Low memory client settings
         "client_flag": 0,       # Disable unnecessary client flags
     }
 )

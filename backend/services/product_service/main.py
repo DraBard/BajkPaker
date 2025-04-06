@@ -4,6 +4,10 @@ import os
 import logging
 import uvicorn
 import mimetypes
+import gc
+
+# Force garbage collection to run more aggressively
+gc.set_threshold(100, 5, 5)
 
 # Configure logging
 logging.basicConfig(
@@ -25,7 +29,7 @@ mimetypes.add_type("image/jpeg", ".jpg")
 mimetypes.add_type("image/jpeg", ".jpeg")
 mimetypes.add_type("image/png", ".png")
 
-app = FastAPI(title="Product Service")
+app = FastAPI(title="Product Service", docs_url=None, redoc_url=None)  # Disable docs in production
 
 # Get allowed origins from env or use default values
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "https://bajkpaker.fly.dev").split(",")
@@ -51,6 +55,10 @@ async def log_requests(request: Request, call_next):
 
     logger.info(f"Response status code: {response.status_code}")
     logger.info(f"Response headers: {response.headers}")
+    
+    # Force garbage collection after each request
+    gc.collect()
+    
     return response
 
 
@@ -98,4 +106,6 @@ if __name__ == "__main__":
         log_level="info",
         proxy_headers=True,  # Important for handling proxy headers correctly
         forwarded_allow_ips="*",  # Allow all forwarded IPs in production
+        workers=1,  # Use minimum workers to save memory
+        limit_max_requests=1000,  # Restart workers after handling 1000 requests to prevent memory leaks
     )

@@ -84,24 +84,20 @@ if not check_port(DB_HOST, DB_PORT):
 DATABASE_URL = f"mysql+asyncmy://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 print(f"Database URL: mysql+asyncmy://{DB_USER}:****@{DB_HOST}:{DB_PORT}/{DB_NAME}")
 
-# Create engine with optimized settings for potentially unstable connections
-print("Creating database engine with the following settings:")
-print("- pool_recycle: 60 seconds (shorter to avoid stale connections)")
-print("- pool_timeout: 10 seconds (shorter timeout)")
-print("- pool_pre_ping: True (verify connections before use)")
-print("- connect_args: {'connect_timeout': 10} (connection timeout)")
-
+# Create engine with optimized settings for low memory
 engine = create_async_engine(
     DATABASE_URL,
     echo=True,
-    pool_recycle=60,  # Recycle connections more frequently
-    pool_timeout=10,  # Shorter timeout
-    pool_pre_ping=True,  # Check connection before use
+    pool_recycle=60,      # Recycle connections more frequently
+    pool_timeout=10,      # Shorter timeout
+    pool_pre_ping=True,   # Check connection before use
+    pool_size=2,          # Limit number of connections
+    max_overflow=3,       # Limit max overflow connections
     connect_args={
         "connect_timeout": 10,  # MySQL connection timeout in seconds
     },
 )
-print("Database engine created")
+print("Database engine created with optimized memory settings")
 
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 print("Session factory created")

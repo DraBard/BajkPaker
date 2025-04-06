@@ -41,6 +41,9 @@ docker run -d \
 
   mysql -h 127.0.0.1 -P 3306 -u bajkpaker -p
 
+  for mariadb:
+  mysql -h 127.0.0.1 -P 3306 -u bajkpaker -p --enable-cleartext-plugin
+
   SHOW DATABASES;
   USE bajkpaker_dev;
   SHOW TABLES;

@@ -136,7 +136,7 @@ const BikePage = () => {
     <BikeContainer backgroundColor={bikeStyle.backgroundColor}>
       <h1>{bike.name}</h1>
       <p>{bike.description}</p>
-      <p>${bike.price}</p>
+      <p>{bike.price} PLN</p>
       <AddToCartButton 
         onClick={handleAddToCart} 
         disabled={isLoading || addedToCart}

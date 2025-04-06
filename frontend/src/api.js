@@ -32,6 +32,13 @@ export const fetchBikes = async () => {
   return response.data;
 };
 
+export const fetchRevivedBikes = async () => {
+  const url = `${PRODUCT_API_URL}/bikes/revived`;
+  logRequest(url);
+  const response = await axios.get(url);
+  return response.data;
+};
+
 export const fetchBike = async (bikeId) => {
   const url = `${PRODUCT_API_URL}/bikes/${bikeId}`;
   logRequest(url);

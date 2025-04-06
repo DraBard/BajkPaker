@@ -131,8 +131,10 @@ async def update_bike_and_image_data(metadata_file):
                     "id": bike_id,
                     "name": bike_details.get("name"),
                     "description": bike_details.get("description"),
-                    # Map price_per_day to price
-                    "price": bike_details.get("price_per_day"),
+                    # Use price directly from JSON instead of price_per_day
+                    "price": bike_details.get("price"),
+                    # Add bought field if it exists in the JSON
+                    "bought": bike_details.get("bought", False),
                 }
 
                 # Add other fields that exist in the model if needed

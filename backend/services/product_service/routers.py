@@ -21,6 +21,15 @@ async def read_bikes(db: AsyncSession = Depends(get_db)):
     return bikes
 
 
+@router.get("/api/bikes/revived", response_model=list[BikeOut])
+async def read_revived_bikes(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(Bike).where(Bike.bought == True).options(selectinload(Bike.images))
+    )
+    bikes = result.scalars().all()
+    return bikes
+
+
 @router.patch("/api/bikes/{bike_id}/mark_as_bought")
 async def mark_bike_as_bought(bike_id: int, db: AsyncSession = Depends(get_db)):
     bike = await db.get(Bike, bike_id)

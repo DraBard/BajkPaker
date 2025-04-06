@@ -13,5 +13,20 @@
       {"image_url": "/static/images/WhatsApp Image 2024-10-01 at 11.18.10 (1).jpeg", "is_main": false},
       {"image_url": "/static/images/WhatsApp Image 2024-10-01 at 11.18.10.jpeg", "is_main": false}
     ]
+  },
+  {
+    "bike_id": 2,
+    "bike_data": {
+      "name": "Zymft",
+      "description": "Elegancki rower miejski dla miłośniczki musztardy – styl i funkcjonalność w jednym!\n\nTen wyjątkowy rower to idealny towarzysz miejskich przejażdżek dla kobiety z charakterem i wyrafinowanym gustem – szczególnie jeśli w sercu nosi... miłość do musztardy! Klasyczna rama w ciepłym odcieniu przypominającym złotą musztardę przyciąga wzrok i dodaje charakteru każdej stylizacji.\n\nWyposażony w praktyczną, elegancką torbę na zakupy – idealną na słoiczki ulubionej musztardy, ale równie świetną na codzienne zakupy czy piknikowe przekąski. Torba została zaprojektowana tak, by pasować do estetyki roweru i podkreślić Twoją indywidualność.\n\nWygodne siodełko, lekkie prowadzenie i klasyczne detale sprawiają, że każda podróż – czy to na targ, do pracy, czy na spotkanie z przyjaciółmi – staje się czystą przyjemnością. Ten rower to nie tylko środek transportu, to styl życia!",
+      "price": 2000,
+      "bought": false
+    },
+    "images": [
+      {"image_url": "/static/images/PortoMain.jpg", "is_main": true},
+      {"image_url": "/static/images/WhatsApp Image 2024-10-01 at 10.24.06.jpeg", "is_main": false},
+      {"image_url": "/static/images/WhatsApp Image 2024-10-01 at 11.18.10 (1).jpeg", "is_main": false},
+      {"image_url": "/static/images/WhatsApp Image 2024-10-01 at 11.18.10.jpeg", "is_main": false}
+    ]
   }
 ]

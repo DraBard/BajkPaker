@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { fetchBikes } from '../api';
+import { Link } from 'react-router-dom';
+import { fetchRevivedBikes } from '../api';
 
 const RevivedContainer = styled.div`
   display: grid;
@@ -56,44 +57,40 @@ const FallbackImage = styled.div`
 const DEFAULT_IMAGE_PATH = '/placeholder-bike.jpg';
 
 const RevivedPage = () => {
-  const [bike, setBike] = useState(null);
+  const [bikes, setBikes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [imageError, setImageError] = useState(false);
+  const [imageErrors, setImageErrors] = useState({});
 
   useEffect(() => {
-    const getBikes = async () => {
+    const getRevivedBikes = async () => {
       try {
         setIsLoading(true);
-        const data = await fetchBikes();
-        if (data.length > 0) {
-          setBike(data[0]);
-        }
+        const data = await fetchRevivedBikes();
+        setBikes(data);
       } catch (error) {
-        console.error('Failed to fetch bikes:', error);
-        setError('Failed to load revived bike. Please try again later.');
+        console.error('Failed to fetch revived bikes:', error);
+        setError('Failed to load revived bikes. Please try again later.');
       } finally {
         setIsLoading(false);
       }
     };
 
-    getBikes();
+    getRevivedBikes();
   }, []);
 
   if (isLoading) {
-    return <p>Loading revived bike...</p>;
+    return <p>Loading revived bikes...</p>;
   }
 
   if (error) {
     return <p>{error}</p>;
   }
 
-  if (!bike) {
-    return <p>No bike available in the revived section.</p>;
+  if (bikes.length === 0) {
+    return <p>No revived bikes available at this moment.</p>;
   }
 
-  const mainImage = bike.images.find(image => image.is_main);
-  
   // Helper function to generate correct image URLs
   const getImageUrl = (imagePath) => {
     if (!imagePath) return DEFAULT_IMAGE_PATH;
@@ -104,34 +101,44 @@ const RevivedPage = () => {
     // For relative paths, ensure they start with a slash
     const path = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
     
-    // Use the backend service URL without port number
-    return `https://product-service.fly.dev${path}`;
+    // Use the backend service URL without port number and add cache-busting
+    return `https://product-service.fly.dev${path}?t=${Date.now()}`;
   };
 
-  const handleImageError = () => {
-    console.error(`Failed to load image for bike ID: ${bike.id}`);
-    setImageError(true);
+  const handleImageError = (bikeId) => {
+    console.error(`Failed to load image for bike ID: ${bikeId}`);
+    setImageErrors(prev => ({
+      ...prev,
+      [bikeId]: true
+    }));
   };
-
-  const imageUrl = mainImage 
-    ? getImageUrl(mainImage.image_url)
-    : DEFAULT_IMAGE_PATH;
 
   return (
     <RevivedContainer>
-      <ProductCard>
-        {imageError ? (
-          <FallbackImage>Image not available</FallbackImage>
-        ) : (
-          <img 
-            src={imageUrl} 
-            alt={bike.name} 
-            onError={handleImageError}
-          />
-        )}
-        <h3>{bike.name}</h3>
-        <p>${bike.price}</p>
-      </ProductCard>
+      {bikes.map((bike) => {
+        const mainImage = bike.images.find(image => image.is_main);
+        const imageUrl = mainImage 
+          ? getImageUrl(mainImage.image_url)
+          : DEFAULT_IMAGE_PATH;
+        
+        return (
+          <Link to={`/shop/${bike.id}`} key={bike.id}>
+            <ProductCard>
+              {imageErrors[bike.id] ? (
+                <FallbackImage>Image not available</FallbackImage>
+              ) : (
+                <img 
+                  src={imageUrl} 
+                  alt={bike.name} 
+                  onError={() => handleImageError(bike.id)}
+                />
+              )}
+              <h3>{bike.name}</h3>
+              <p>${bike.price}</p>
+            </ProductCard>
+          </Link>
+        );
+      })}
     </RevivedContainer>
   );
 };

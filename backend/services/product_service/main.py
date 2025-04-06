@@ -29,7 +29,9 @@ mimetypes.add_type("image/jpeg", ".jpg")
 mimetypes.add_type("image/jpeg", ".jpeg")
 mimetypes.add_type("image/png", ".png")
 
-app = FastAPI(title="Product Service", docs_url=None, redoc_url=None)  # Disable docs in production
+app = FastAPI(
+    title="Product Service", docs_url=None, redoc_url=None
+)  # Disable docs in production
 
 # Get allowed origins from env or use default values
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "https://bajkpaker.fly.dev").split(",")
@@ -55,10 +57,10 @@ async def log_requests(request: Request, call_next):
 
     logger.info(f"Response status code: {response.status_code}")
     logger.info(f"Response headers: {response.headers}")
-    
+
     # Force garbage collection after each request
     gc.collect()
-    
+
     return response
 
 

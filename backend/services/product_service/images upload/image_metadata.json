@@ -2,17 +2,13 @@
   {
     "bike_id": 1,
     "bike_data": {
-      "name": "Porto - Mountain Bike",
-      "description": "A sturdy mountain bike ideal for off-road trails",
-      "price_per_day": 25.00,
-      "type": "mountain",
-      "size": "M",
-      "brand": "Porto",
-      "is_electric": false
+      "name": "Porto",
+      "description": "Elegancki rower miejski dla konesera Porto. Wyposażony w bagażnik idealny do przewożenia ulubionych win.",
+      "price": 2000,
+      "bought": true
     },
     "images": [
       {"image_url": "/static/images/PortoMain.jpg", "is_main": true},
-      {"image_url": "/static/images/WhatsApp Image 2024-10-01 at 10.24.06.jpeg (2)", "is_main": false},
       {"image_url": "/static/images/WhatsApp Image 2024-10-01 at 10.24.06.jpeg", "is_main": false},
       {"image_url": "/static/images/WhatsApp Image 2024-10-01 at 11.18.10 (1).jpeg", "is_main": false},
       {"image_url": "/static/images/WhatsApp Image 2024-10-01 at 11.18.10.jpeg", "is_main": false}

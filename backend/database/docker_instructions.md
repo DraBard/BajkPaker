@@ -48,3 +48,16 @@ docker run -d \
   USE bajkpaker_dev;
   SHOW TABLES;
   DESC table_name;
+
+
+
+
+Prompt:
+  In order to deploy this project on fly.io I have to do the following things.
+  1. Launch @fly.toml frontend with command 'flyctl launch'
+  2. Launch@fly.toml database with command 'flyctl launch'
+  3. launch product-service @fly.toml with command 'flyctl launch'
+  4. Then I have to upload the images on the product service volume using @upload_images_flyio.sh 
+  5. Then open proxy on database with 'flyctl proxy 3306'
+  6. Update the database@update_image_metadata.py 
+  Create one script that will do it with only one launch. Remember each of these files has to be launched from a folder level terminal and they are in different directiores.

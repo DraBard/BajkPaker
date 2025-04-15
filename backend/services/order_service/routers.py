@@ -16,11 +16,11 @@ try:
     # Updated import path to use the shared database properly
     sys.path.append(str(Path(__file__).resolve().parents[2]))
     from backend.database.models import Order, OrderItem, CartItem, Bike
-    from backend.database.client import get_db
+    from database import get_db
 except ImportError:
     sys.path.append(str(Path(__file__).resolve().parents[3]))
     from backend.database.models import Order, OrderItem, CartItem, Bike
-    from backend.database.client import get_db
+    from database import get_db
 
 router = APIRouter()
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")

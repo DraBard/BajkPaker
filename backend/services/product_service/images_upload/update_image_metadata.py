@@ -225,10 +225,10 @@ async def update_bike_and_image_data(metadata_file):
 async def main():
     """Main function to update bike and image data in the database"""
     if len(sys.argv) < 2:
-        print("Usage: python update_image_metadata.py <metadata_file.json>")
-        sys.exit(1)
-
-    metadata_file = "image_metadata.json"
+        print("No metadata file specified, using default: image_metadata.json")
+        metadata_file = "image_metadata.json"
+    else:
+        metadata_file = sys.argv[1]
 
     # Ensure file path is correct
     if not os.path.exists(metadata_file):

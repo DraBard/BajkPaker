@@ -14,6 +14,7 @@ try:
 except ImportError:
     sys.path.append(str(Path(__file__).resolve().parents[2]))
     from database import get_db
+
     # from database.models import User
 
 

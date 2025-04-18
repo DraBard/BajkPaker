@@ -154,7 +154,9 @@ dist/
 
 githubtoken.md
 
-backend/services/product_service/static/images/*
+backend/services/product_service/static/*
+backend/services/product_service/images_upload/static/*
+frontend/public/images/*
 image.png
 
 backend/database/fly.toml

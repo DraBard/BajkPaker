@@ -61,3 +61,8 @@ Prompt:
   5. Then open proxy on database with 'flyctl proxy 3306'
   6. Update the database@update_image_metadata.py 
   Create one script that will do it with only one launch. Remember each of these files has to be launched from a folder level terminal and they are in different directiores.
+
+IN DEBUGG MODE:
+
+to connect to db:
+docker exec -it bajkpaker-mysql mysql -u bajkpaker -p

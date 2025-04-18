@@ -100,7 +100,6 @@ const BikePage = () => {
     }
   };
 
-  // Helper function to generate correct image URLs
   const getImageUrl = (imagePath) => {
     if (!imagePath) return DEFAULT_IMAGE_PATH;
     
@@ -110,8 +109,17 @@ const BikePage = () => {
     // For relative paths, ensure they start with a slash
     const path = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
     
-    // Use the backend service URL without port number
-    return `https://product-service.fly.dev${path}`;
+    // Check for development environment using window.location instead of process.env
+    const isDevelopment = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1';
+    
+    // Extract the filename from the path
+    const filename = path.split('/').pop();
+    
+    // Use only the filename in development, otherwise use the full URL
+    return isDevelopment 
+      ? `/images/${filename}` 
+      : `https://product-service.fly.dev${path}`;
   };
   
   const handleImageError = (imageId) => {

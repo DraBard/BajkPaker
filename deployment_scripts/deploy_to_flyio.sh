@@ -210,7 +210,7 @@ if check_app_exists "product-service"; then
   # Upload images to product service volume
   step 5 "Uploading Images"
   if check_app_exists "product-service"; then
-    run_in_dir "backend/services/product_service/images upload" "bash upload_images_flyio.sh" "Uploading product images to fly.io volume" true
+    run_in_dir "backend/services/product_service/images_upload" "bash upload_images_flyio.sh" "Uploading product images to fly.io volume" true
   else
     echo "❌ Product service app 'product-service' does not exist. Skipping image upload."
     GLOBAL_ERROR=1
@@ -239,7 +239,7 @@ if nc -z -w 5 localhost 3306 2>/dev/null; then
   
   # Update database with image metadata
   step 7 "Updating Database"
-  run_in_dir "backend/services/product_service/images upload" "python update_image_metadata.py image_metadata.json" "Updating database with bike and image data" true
+  run_in_dir "backend/services/product_service/images_upload" "python update_image_metadata.py image_metadata.json" "Updating database with bike and image data" true
 else
   echo "❌ Unable to connect to database on port 3306. Please verify:"
   echo "  1. You've started the proxy in another terminal"

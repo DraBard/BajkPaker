@@ -86,9 +86,9 @@ const ShopPage = () => {
     return <p>No bikes available for purchase.</p>;
   }
 
-  // Helper function to generate correct image URLs
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return '/path/to/default-image.jpg';
+    // Return default image if no path provided
+    if (!imagePath) return DEFAULT_IMAGE_PATH;
     
     // For fully qualified URLs, use as-is
     if (imagePath.startsWith('http')) return imagePath;
@@ -96,8 +96,17 @@ const ShopPage = () => {
     // For relative paths, ensure they start with a slash
     const path = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
     
-    // Use the backend service URL without port number and add cache-busting
-    return `https://product-service.fly.dev${path}?t=${Date.now()}`;
+    // Check for development environment using window.location
+    const isDevelopment = window.location.hostname === 'localhost' || 
+                          window.location.hostname === '127.0.0.1';
+    
+    // Extract the filename from the path
+    const filename = path.split('/').pop();
+    
+    // Use only the filename in development, otherwise use the full URL
+    return isDevelopment
+      ? `/images/${filename}`
+      : `https://product-service.fly.dev${path}`;
   };
 
   const handleImageError = (bikeId) => {

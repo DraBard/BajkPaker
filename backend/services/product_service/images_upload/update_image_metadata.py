@@ -7,7 +7,7 @@ from pathlib import Path
 import json
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import text, select, delete, update
+from sqlalchemy import text, select, delete
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -23,48 +23,47 @@ from database.models import Bike, BikeImage
 # Database connection parameters
 DB_USER = os.getenv("DB_USER", "bajkpaker")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
-# For local development with flyctl proxy, use localhost/127.0.0.1 instead of internal hostname
-is_local = True  # Set this to True when running locally
-DB_HOST = "127.0.0.1" if is_local else os.getenv("DB_HOST", "bajkpaker-mysql.internal")
+# For local development localhost is obvious
+# For production when uploading the images proxying is done localhost is tunneled to bajkpaker-mysql.internal
+# Therefore there is no no need to change the host
+DB_HOST = "127.0.0.1" 
 DB_PORT = os.getenv("DB_PORT", "3306")
 DB_NAME = os.getenv("DB_NAME", "bajkpaker_dev")
 
-print(f"Environment: {'Local development' if is_local else 'Production'}")
 print(f"Using database: mysql+asyncmy://{DB_USER}:****@{DB_HOST}:{DB_PORT}/{DB_NAME}")
 
-if is_local:
-    print("\n⚠️  IMPORTANT CONNECTION NOTICE ⚠️")
-    print("This script requires an active flyctl proxy tunnel.")
-    print("If you haven't started one yet, please run:")
-    print("   flyctl proxy 3306 -a bajkpaker-mysql")
-    print("in a separate terminal window.\n")
+print("\n⚠️  IMPORTANT CONNECTION NOTICE ⚠️")
+print("This script requires an active flyctl proxy tunnel.")
+print("If you haven't started one yet, please run:")
+print("   flyctl proxy 3306 -a bajkpaker-mysql")
+print("in a separate terminal window.\n")
 
-    # Check if the port is reachable before proceeding
-    def check_port(host, port, timeout=5):
-        print(f"Testing connection to {host}:{port} (timeout: {timeout}s)...")
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(timeout)
-            result = sock.connect_ex((host, int(port)))
-            if result == 0:
-                print(f"✅ Connection to {host}:{port} successful!")
-                sock.close()
-                return True
-            else:
-                print(f"❌ Connection to {host}:{port} failed (error code: {result})")
-                return False
-        except Exception as e:
-            print(f"❌ Error testing connection: {e}")
-            return False
-        finally:
+# Check if the port is reachable before proceeding
+def check_port(host, port, timeout=5):
+    print(f"Testing connection to {host}:{port} (timeout: {timeout}s)...")
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        result = sock.connect_ex((host, int(port)))
+        if result == 0:
+            print(f"✅ Connection to {host}:{port} successful!")
             sock.close()
+            return True
+        else:
+            print(f"❌ Connection to {host}:{port} failed (error code: {result})")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing connection: {e}")
+        return False
+    finally:
+        sock.close()
 
-    # Test connection before proceeding
-    if not check_port(DB_HOST, DB_PORT):
-        print("\n🚨 Cannot connect to MySQL server! 🚨")
-        print("Please start a fly.io proxy tunnel first:")
-        print(f"   flyctl proxy {DB_PORT} -a bajkpaker-mysql")
-        sys.exit(1)
+# Test connection before proceeding
+if not check_port(DB_HOST, DB_PORT):
+    print("\n🚨 Cannot connect to MySQL server! 🚨")
+    print("Please start a fly.io proxy tunnel first:")
+    print(f"   flyctl proxy {DB_PORT} -a bajkpaker-mysql")
+    sys.exit(1)
 
 # Build the database URL
 DATABASE_URL = f"mysql+asyncmy://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"

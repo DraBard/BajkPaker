@@ -26,7 +26,7 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 # For local development localhost is obvious
 # For production when uploading the images proxying is done localhost is tunneled to bajkpaker-mysql.internal
 # Therefore there is no no need to change the host
-DB_HOST = "127.0.0.1" 
+DB_HOST = "127.0.0.1"
 DB_PORT = os.getenv("DB_PORT", "3306")
 DB_NAME = os.getenv("DB_NAME", "bajkpaker_dev")
 
@@ -37,6 +37,7 @@ print("This script requires an active flyctl proxy tunnel.")
 print("If you haven't started one yet, please run:")
 print("   flyctl proxy 3306 -a bajkpaker-mysql")
 print("in a separate terminal window.\n")
+
 
 # Check if the port is reachable before proceeding
 def check_port(host, port, timeout=5):
@@ -57,6 +58,7 @@ def check_port(host, port, timeout=5):
         return False
     finally:
         sock.close()
+
 
 # Test connection before proceeding
 if not check_port(DB_HOST, DB_PORT):

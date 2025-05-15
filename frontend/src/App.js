@@ -10,6 +10,7 @@ import ContactPage from './components/ContactPage';
 import BikePage from './components/BikePage';
 import CartPage from './components/CartPage';
 import RevivedPage from './components/RevivedPage';
+import RevivedDetailsPage from './components/RevivedDetailsPage';
 import UserAuthPage from './components/UserAuthPage';
 import GlobalStyle from './styles/GlobalStyle';
 import theme from './styles/theme';
@@ -28,6 +29,7 @@ function App() {
             <Route path="/shop/:bikeId" element={<BikePage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/revived" element={<RevivedPage />} />
+            <Route path="/revived/:id" element={<RevivedDetailsPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/auth" element={<UserAuthPage />} />

@@ -46,8 +46,20 @@ async def read_bike(bike_id: int, db: AsyncSession = Depends(get_db)):
         select(Bike).where(Bike.id == bike_id).options(selectinload(Bike.images))
     )
     bike = result.scalar_one_or_none()
-
     if not bike:
         raise HTTPException(status_code=404, detail="Bike not found")
+    return bike
 
+
+@router.get("/api/bikes/revived/{bike_id}", response_model=BikeOut)
+async def read_revived_bike(bike_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(Bike)
+        .where(Bike.id == bike_id)
+        .where(Bike.bought == True)
+        .options(selectinload(Bike.images))
+    )
+    bike = result.scalar_one_or_none()
+    if not bike:
+        raise HTTPException(status_code=404, detail="Revived bike not found")
     return bike

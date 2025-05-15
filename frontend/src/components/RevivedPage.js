@@ -131,7 +131,7 @@ const RevivedPage = () => {
           : DEFAULT_IMAGE_PATH;
         
         return (
-          <Link to={`/shop/${bike.id}`} key={bike.id}>
+          <Link to={`/revived/${bike.id}`} key={bike.id}>
             <ProductCard>
               {imageErrors[bike.id] ? (
                 <FallbackImage>Image not available</FallbackImage>

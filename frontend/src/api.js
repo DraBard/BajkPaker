@@ -39,6 +39,13 @@ export const fetchRevivedBikes = async () => {
   return response.data;
 };
 
+export const fetchRevivedBike = async (bikeId) => {
+  const url = `${PRODUCT_API_URL}/bikes/revived/${bikeId}`;
+  logRequest(url);
+  const response = await axios.get(url);
+  return response.data;
+};
+
 export const fetchBike = async (bikeId) => {
   const url = `${PRODUCT_API_URL}/bikes/${bikeId}`;
   logRequest(url);
@@ -100,3 +107,4 @@ export const uploadBikeImage = async (bikeId, imageFile, isMain = false) => {
   
   return response.data;
 };
+

@@ -11,9 +11,19 @@ const FooterContainer = styled.footer`
   width: 100%;
 `;
 
-const Footer = () => (
+const TermsLink = styled.span`
+  color: #fff;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 10px;
+`;
+
+const Footer = ({ onOpenTerms }) => (
   <FooterContainer>
-    <p>&copy; {new Date().getFullYear()} BajkPaker. All rights reserved.</p>
+    <p>
+      &copy; {new Date().getFullYear()} BajkPaker. All rights reserved.
+      {onOpenTerms && <TermsLink onClick={onOpenTerms}>Regulamin</TermsLink>}
+    </p>
   </FooterContainer>
 );
 

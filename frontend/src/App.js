@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import Header from './components/Header';
@@ -15,8 +15,11 @@ import UserAuthPage from './components/UserAuthPage';
 import GlobalStyle from './styles/GlobalStyle';
 import theme from './styles/theme';
 import { CartProvider } from './CartContext';
+import { TermsModal } from './components/TermsModal';
 
 function App() {
+  const [termsOpen, setTermsOpen] = useState(false);
+
   return (
     <ThemeProvider theme={theme}>
       <CartProvider>
@@ -36,7 +39,8 @@ function App() {
             <Route path="/payment-success" element={<h1>Payment Successful!</h1>} />
             <Route path="/payment-cancel" element={<h1>Payment Canceled</h1>} />
           </Routes>
-          <Footer />
+          <Footer onOpenTerms={() => setTermsOpen(true)} />
+          <TermsModal open={termsOpen} onClose={() => setTermsOpen(false)} />
         </Router>
       </CartProvider>
     </ThemeProvider>

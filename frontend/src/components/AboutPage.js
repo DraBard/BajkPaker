@@ -8,8 +8,8 @@ const AboutContainer = styled.div`
 
 const AboutPage = () => (
   <AboutContainer>
-    <h1>About Us</h1>
-    <p>We are passionate about custom bikes and providing the best service to our customers.</p>
+    <h1>O Nas</h1>
+    <p>Jesteśmy firmą, która tworzy rowery rzemieślnicze, jedyne w swoim rodzaju. Mamy pasję do tworzenia oryginalnych, tematycznych rowerów z sakwami.</p>
   </AboutContainer>
 );
 

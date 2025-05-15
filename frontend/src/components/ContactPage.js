@@ -6,10 +6,19 @@ const ContactContainer = styled.div`
   text-align: center;
 `;
 
+const ContactInfo = styled.div`
+  margin-top: 20px;
+  font-size: 18px;
+`;
+
 const ContactPage = () => (
   <ContactContainer>
-    <h1>Contact Us</h1>
-    <p>Feel free to reach out to us with any questions or concerns.</p>
+    <h1>Kontakt</h1>
+    <p>Kontaktujcie się śmiało w razie wątpliwości co do naszych bajków!</p>
+    <ContactInfo>
+      <p>Telefon: 501 325 559</p>
+      <p>ul. Styczyńskiego 10/1</p>
+    </ContactInfo>
   </ContactContainer>
 );
 

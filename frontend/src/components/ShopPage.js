@@ -138,7 +138,7 @@ const ShopPage = () => {
                 />
               )}
               <h3>{bike.name}</h3>
-              <p>${bike.price}</p>
+              <p>{bike.price} PLN</p>
             </ProductCard>
           </Link>
         );

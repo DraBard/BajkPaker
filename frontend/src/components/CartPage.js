@@ -131,7 +131,7 @@ const CartPage = () => {
               <div>
                 <h3>{item.bike.name}</h3>
                 <p>Quantity: {item.quantity}</p>
-                <p>Price: ${item.bike.price}</p>
+                <p>Price:  {item.bike.price} PLN</p>
               </div>
               <RemoveButton 
                 onClick={() => handleRemoveFromCart(item.id)}
@@ -141,7 +141,7 @@ const CartPage = () => {
               </RemoveButton>
             </CartItem>
           ))}
-          <h2>Total: ${totalPrice.toFixed(2)}</h2>
+          <h2>Total: {totalPrice.toFixed(2)} PLN</h2>
           {cart.length > 0 && (
             <CheckoutButtonContainer>
               <CheckoutButton onClick={handleCheckout} disabled={isLoading}>

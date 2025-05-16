@@ -50,13 +50,19 @@ async def verify_database_tables(session):
     """Verify that required database tables exist"""
     try:
         # Check if bikes table exists (SQLite syntax)
-        result = await session.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name='bikes'"))
+        result = await session.execute(
+            text("SELECT name FROM sqlite_master WHERE type='table' AND name='bikes'")
+        )
         if result.scalar() is None:
             print("❌ Error: bikes table does not exist in the database")
             return False
 
         # Check if bike_images table exists
-        result = await session.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name='bike_images'"))
+        result = await session.execute(
+            text(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='bike_images'"
+            )
+        )
         if result.scalar() is None:
             print("❌ Error: bike_images table does not exist in the database")
             return False

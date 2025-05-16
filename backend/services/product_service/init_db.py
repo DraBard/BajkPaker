@@ -9,10 +9,11 @@ from sqlalchemy.orm import relationship
 # Base class for all models
 Base = declarative_base()
 
+
 # Define models (can be replaced with your actual models import)
 class Bike(Base):
     __tablename__ = "bikes"
-    
+
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
     description = Column(TEXT)
@@ -22,18 +23,22 @@ class Bike(Base):
     brand = Column(String(50))
     is_electric = Column(Boolean, default=False)
     bought = Column(Boolean, default=False)
-    
-    images = relationship("BikeImage", back_populates="bike", cascade="all, delete-orphan")
+
+    images = relationship(
+        "BikeImage", back_populates="bike", cascade="all, delete-orphan"
+    )
+
 
 class BikeImage(Base):
     __tablename__ = "bike_images"
-    
+
     id = Column(Integer, primary_key=True)
     bike_id = Column(Integer, ForeignKey("bikes.id"), nullable=False)
     image_url = Column(String(255), nullable=False)
     is_main = Column(Boolean, default=False)
-    
+
     bike = relationship("Bike", back_populates="images")
+
 
 # Environment variables
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
@@ -51,21 +56,21 @@ else:
 # Build the SQLite database URL
 DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"
 
+
 async def init_db():
     print(f"Initializing database at: {DB_PATH}")
-    
+
     # Create engine
     engine = create_async_engine(
-        DATABASE_URL,
-        echo=True,
-        connect_args={"check_same_thread": False}
+        DATABASE_URL, echo=True, connect_args={"check_same_thread": False}
     )
-    
+
     # Create all tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     print("Database initialized successfully!")
+
 
 if __name__ == "__main__":
     asyncio.run(init_db())

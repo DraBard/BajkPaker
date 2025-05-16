@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "wait-mysql",
+            "type": "shell",
+            "command": "for i in {1..30}; do echo \"Attempt $i: Waiting for MySQL to be ready...\"; if docker exec bajkpaker-mysql sh -c \"mysql -u root -pBajkPaker93.83 -e 'SELECT 1'\" > /dev/null 2>&1; then echo \"MySQL is ready!\"; exit 0; fi; sleep 2; done; echo \"Timed out waiting for MySQL\"; exit 1",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

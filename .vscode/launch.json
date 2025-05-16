@@ -1,0 +1,109 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Frontend",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/frontend",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "start"],
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Product Service",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/services/product_service/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}/backend/services/product_service",
+            "env": {
+                "DB_HOST": "localhost",
+                "DB_PORT": "3306",
+                "DB_USER": "bajkpaker",
+                "DB_PASSWORD": "BajkPaker93.83",
+                "DB_NAME": "bajkpaker_dev",
+                "ALLOWED_ORIGINS": "http://localhost:3000",
+                "ENVIRONMENT": "development",
+                "DB_ECHO": "True"
+            }
+        },
+        {
+            "name": "Order Service",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/services/order_service/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}/backend/services/order_service",
+            "env": {
+                "DB_HOST": "localhost",
+                "DB_PORT": "3306",
+                "DB_USER": "bajkpaker",
+                "DB_PASSWORD": "BajkPaker93.83",
+                "DB_NAME": "bajkpaker_dev",
+                "FRONTEND_URL": "http://localhost:8080",
+                "ENVIRONMENT": "development"
+            }
+        },
+        {
+            "name": "User Service",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/services/user_service/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}/backend/services/user_service",
+            "env": {
+                "DB_HOST": "localhost",
+                "DB_PORT": "3306",
+                "DB_USER": "bajkpaker",
+                "DB_PASSWORD": "BajkPaker93.83",
+                "DB_NAME": "bajkpaker_dev",
+                "ENVIRONMENT": "development"
+            }
+        },
+        {
+            "name": "MySQL Database Setup",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "${workspaceFolder}/.vscode/setup-mysql.js",
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Update Image Metadata",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/services/product_service/images_upload/update_image_metadata.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}/backend/services/product_service/images_upload",
+            "env": {
+                "DB_HOST": "localhost",
+                "DB_PORT": "3306",
+                "DB_USER": "bajkpaker",
+                "DB_PASSWORD": "BajkPaker93.83",
+                "DB_NAME": "bajkpaker_dev",
+                "ENVIRONMENT": "development"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Run All Services",
+            "configurations": [
+                "MySQL Database Setup",
+                "Update Image Metadata",
+                "Product Service",
+                // "Order Service", 
+                // "User Service",
+                "Frontend"
+            ],
+            "stopAll": true,
+            "preLaunchTask": "wait-mysql"
+        }
+    ],
+}

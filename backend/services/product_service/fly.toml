@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for product-service on 2025-04-06T15:53:29+02:00
+# fly.toml app configuration file generated for product-service on 2025-05-16T16:14:38+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -12,13 +12,7 @@ primary_region = 'waw'
   ALLOWED_ORIGINS = 'https://bajkpaker.fly.dev'
   DB_ECHO = 'False'
   ENVIRONMENT = 'production'
-  # SQLite-specific config
-  SQLITE_PATH = '/data/bajkpaker.db'
-
-# Mount two volumes - one for images, one for SQLite database
-[[mounts]]
-  source = 'product_images'
-  destination = '/app/static/images'
+  SQLITE_PATH = '/data/product_service.db'
 
 [[mounts]]
   source = 'product_data'

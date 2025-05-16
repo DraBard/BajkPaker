@@ -18,7 +18,7 @@ cd "$PROJECT_ROOT" || exit 1
 GLOBAL_ERROR=0
 
 # Maximum number of retries for commands
-MAX_RETRIES=3
+MAX_RETRIES=1
 
 # Function to display step information
 step() {
@@ -129,6 +129,7 @@ launch_fly_app() {
   if [ $? -eq 0 ]; then
     echo "✅ App launched successfully!"
     echo "🔧 Now deploying the app..."
+    echo "ℹ️  This step may take several minutes while Fly.io builds your Docker image. Please be patient..."
     flyctl deploy --yes --now
     local result=$?
     if [ $result -ne 0 ]; then
@@ -179,11 +180,11 @@ if check_app_exists "bajkpaker"; then
   echo "🔍 Frontend app 'bajkpaker' already exists."
   echo "🔄 Deploying new version..."
   run_in_dir "frontend" "flyctl deploy --yes --now" "Deploying frontend application" true
-  verify_app "bajkpaker" 3 20
+  verify_app "bajkpaker" 5 10
 else
   echo "🆕 Creating new frontend app..."
   launch_fly_app "frontend" "Launching frontend application" "bajkpaker"
-  verify_app "bajkpaker" 3 20
+  verify_app "bajkpaker" 5 10
 fi
 
 # Deploy Product Service
@@ -192,45 +193,82 @@ if check_app_exists "product-service"; then
   echo "🔍 Product service app 'product-service' already exists."
   echo "🔄 Deploying new version..."
   run_in_dir "backend/services/product_service" "flyctl deploy --yes --now" "Deploying product service" true
-  verify_app "product-service" 3 20
+  verify_app "product-service" 5 10
 else
   echo "🆕 Creating new product service app..."
   launch_fly_app "backend/services/product_service" "Launching product service" "product-service"
-  verify_app "product-service" 3 20
+  verify_app "product-service" 5 10
 fi
 
-# Create volumes for images and SQLite database
-step 3 "Creating Volumes"
+# Deploy User Service
+# step 3 "Deploying User Service"
+# if check_app_exists "user-service"; then
+#   echo "🔍 User service app 'user-service' already exists."
+#   echo "🔄 Deploying new version..."
+#   run_in_dir "backend/services/user_service" "flyctl deploy --yes --now" "Deploying user service" true
+#   verify_app "user-service" 5 10
+# else
+#   echo "🆕 Creating new user service app..."
+#   launch_fly_app "backend/services/user_service" "Launching user service" "user-service"
+#   verify_app "user-service" 5 10
+# fi
+
+# Deploy Order Service
+# step 4 "Deploying Order Service"
+# if check_app_exists "order-service"; then
+#   echo "🔍 Order service app 'order-service' already exists."
+#   echo "🔄 Deploying new version..."
+#   run_in_dir "backend/services/order_service" "flyctl deploy --yes --now" "Deploying order service" true
+#   verify_app "order-service" 5 10
+# else
+#   echo "🆕 Creating new order service app..."
+#   launch_fly_app "backend/services/order_service" "Launching order service" "order-service"
+#   verify_app "order-service" 5 10
+# fi
+
+# Create volumes for SQLite databases
+step 5 "Creating Volumes for SQLite Databases"
+
+# Product Service volume
 if check_app_exists "product-service"; then
-  # Create images volume
-  if ! check_volume_exists "product-service" "product_images"; then
-    run_in_dir "backend/services/product_service" "flyctl volumes create product_images --size 1 --region waw --yes" "Creating product_images volume" true
-  else
-    echo "✅ Volume 'product_images' already exists."
-  fi
-  
-  # Create SQLite data volume
   if ! check_volume_exists "product-service" "product_data"; then
-    run_in_dir "backend/services/product_service" "flyctl volumes create product_data --size 1 --region waw --yes" "Creating product_data volume" true
+    run_in_dir "backend/services/product_service" "flyctl volumes create product_data --size 2 --region waw --yes" "Creating product_data volume" true
   else
     echo "✅ Volume 'product_data' already exists."
   fi
-  
-  # Upload images to product service volume
-  step 4 "Uploading Images"
-  run_in_dir "backend/services/product_service/images_upload" "bash upload_images_flyio.sh" "Uploading product images to fly.io volume" true
-  
-  # Initialize SQLite database on the server
-  step 5 "Initializing SQLite Database"
-  run_in_dir "backend/services/product_service" "flyctl ssh console -a product-service -C 'python /app/init_sqlite_db.py'" "Initializing SQLite database" true
-  
-  # Update database with image metadata
-  step 6 "Updating Database with Metadata"
-  run_in_dir "backend/services/product_service" "flyctl ssh console -a product-service -C 'cd /app && python images_upload/update_image_metadata.py images_upload/image_metadata.json'" "Updating database with bike and image data" true
-else
-  echo "❌ Product service app 'product-service' does not exist. Skipping volume creation and setup."
-  GLOBAL_ERROR=1
 fi
+
+# User Service volume
+# if check_app_exists "user-service"; then
+#   if ! check_volume_exists "user-service" "user_data"; then
+#     run_in_dir "backend/services/user_service" "flyctl volumes create user_data --size 1 --region waw --yes" "Creating user_data volume" true
+#   else
+#     echo "✅ Volume 'user_data' already exists."
+#   fi
+# fi
+
+# Order Service volume
+# if check_app_exists "order-service"; then
+#   if ! check_volume_exists "order-service" "order_data"; then
+#     run_in_dir "backend/services/order_service" "flyctl volumes create order_data --size 1 --region waw --yes" "Creating order_data volume" true
+#   else
+#     echo "✅ Volume 'order_data' already exists."
+#   fi
+# fi
+
+# Upload images to product service volume
+step 6 "Uploading Images"
+run_in_dir "backend/services/product_service/images_upload" "bash upload_images_flyio.sh" "Uploading product images to fly.io volume" true
+
+# Initialize SQLite databases on the server
+step 7 "Initializing SQLite Databases"
+run_in_dir "backend/services/product_service" "flyctl ssh console -a product-service -C 'python /app/init_sqlite_db.py --db-path /data/product_service.db'" "Initializing product service SQLite database" true
+# run_in_dir "backend/services/user_service" "flyctl ssh console -a user-service -C 'python /app/init_sqlite_db.py --db-path /data/user_service.db'" "Initializing user service SQLite database" true
+# run_in_dir "backend/services/order_service" "flyctl ssh console -a order-service -C 'python /app/init_sqlite_db.py --db-path /data/order_service.db'" "Initializing order service SQLite database" true
+
+# Update product database with image metadata
+step 8 "Updating Product Database with Metadata"
+run_in_dir "backend/services/product_service" "flyctl ssh console -a product-service -C 'cd /app && python images_upload/update_image_metadata.py images_upload/image_metadata.json'" "Updating product database with bike and image data" true
 
 echo ""
 if [ $GLOBAL_ERROR -eq 0 ]; then

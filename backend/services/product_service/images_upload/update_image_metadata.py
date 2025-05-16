@@ -21,16 +21,18 @@ from database.models import Bike, BikeImage
 
 # Environment variables
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+SQLITE_PATH = os.getenv("SQLITE_PATH")
 
 # SQLite database path configuration
-if ENVIRONMENT == "production":
-    # Use the mounted volume path in fly.io
-    DB_PATH = "/data/bajkpaker.db"
-    # Create directory if it doesn't exist
+if SQLITE_PATH:
+    DB_PATH = SQLITE_PATH
+elif ENVIRONMENT == "production":
+    DB_PATH = "/app/product_service.db"
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 else:
-    # Local development path
-    DB_PATH = os.path.join(Path(__file__).parents[1], "bajkpaker.db")
+    DB_PATH = os.path.join(
+        Path(__file__).parents[1], "product_service.db"
+    )
 
 print(f"Using database: {DB_PATH}")
 
@@ -213,7 +215,7 @@ async def main():
             print(
                 f"Error: Metadata file not found at '{metadata_file}' or '{alternative_path}'"
             )
-            sys.exit(1)
+            return 1  # Return error code instead of sys.exit
 
     print(f"Using metadata file: {metadata_file}")
 
@@ -221,16 +223,18 @@ async def main():
         success = await update_bike_and_image_data(metadata_file)
         if success:
             print("✅ Bike and image data update completed successfully")
+            return 0
         else:
             print("❌ Bike and image data update failed")
-            sys.exit(1)
+            return 1
     except Exception as e:
         print(f"❌ Error updating bike and image data: {e}")
         import traceback
 
         traceback.print_exc()
-        sys.exit(1)
+        return 1
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    exit_code = asyncio.run(main())
+    sys.exit(exit_code)

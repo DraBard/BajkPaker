@@ -20,7 +20,7 @@
             "justMyCode": false,
             "cwd": "${workspaceFolder}/backend/services/product_service",
             "env": {
-                "SQLITE_PATH": "${workspaceFolder}/backend/data/product_service.db",
+                "SQLITE_PATH": "${workspaceFolder}/backend/services/product_service/product_service.db",
                 "ALLOWED_ORIGINS": "http://localhost:3000",
                 "ENVIRONMENT": "development",
                 "DB_ECHO": "True"
@@ -59,8 +59,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/backend/database/init_sqlite_db.py",
             "args": [
-                "--db-path", "${workspaceFolder}/backend/data/product_service.db",
-                "--service", "product"
+                "--db-path", "${workspaceFolder}/backend/services/product_service/product_service.db"
             ],
             "console": "integratedTerminal",
             "justMyCode": false,
@@ -75,7 +74,7 @@
             "justMyCode": false,
             "cwd": "${workspaceFolder}/backend/services/product_service/images_upload",
             "env": {
-                "SQLITE_PATH": "${workspaceFolder}/backend/data/product_service.db",
+                "SQLITE_PATH": "${workspaceFolder}/backend/services/product_service/product_service.db",
                 "ENVIRONMENT": "development"
             }
         }
@@ -92,7 +91,6 @@
                 "Frontend"
             ],
             "stopAll": true
-            // Removed preLaunchTask as we don't need to wait for MySQL
         }
     ],
 }

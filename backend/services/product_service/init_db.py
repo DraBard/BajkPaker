@@ -45,13 +45,10 @@ ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 # SQLite database path configuration
 if ENVIRONMENT == "production":
-    # Use the mounted volume path in fly.io
-    DB_PATH = "/data/bajkpaker.db"
-    # Create directory if it doesn't exist
+    DB_PATH = "/app/product_service.db"
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 else:
-    # Local development path
-    DB_PATH = os.path.join(Path(__file__).parent.absolute(), "bajkpaker.db")
+    DB_PATH = os.path.join(Path(__file__).parent.absolute(), "product_service.db")
 
 # Build the SQLite database URL
 DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"

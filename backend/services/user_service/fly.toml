@@ -1,9 +1,9 @@
-# fly.toml app configuration file for user-service
+# fly.toml app configuration file generated for user-service-damp-flower-5043 on 2025-05-16T14:28:20+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'user-service'
+app = 'user-service-damp-flower-5043'
 primary_region = 'waw'
 
 [build]
@@ -12,10 +12,8 @@ primary_region = 'waw'
   ALLOWED_ORIGINS = 'https://bajkpaker.fly.dev,https://order-service.fly.dev,https://product-service.fly.dev'
   DB_ECHO = 'False'
   ENVIRONMENT = 'production'
-  # SQLite-specific config
   SQLITE_PATH = '/data/user_service.db'
 
-# Mount volume for SQLite database
 [[mounts]]
   source = 'user_data'
   destination = '/data'

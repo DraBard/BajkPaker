@@ -16,17 +16,17 @@ DB_ECHO = os.getenv("DB_ECHO", "False").lower() == "true"
 # For fly.io, store the database in the persistent volume
 if ENVIRONMENT == "production":
     # Use the mounted volume path in fly.io
-    DB_PATH = "/data/bajkpaker.db"
-    # Create directory if it doesn't exist
+    DB_PATH = "/data/product_service.db"
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 else:
     # Local development path
-    DB_PATH = os.path.join(pathlib.Path(__file__).parent.absolute(), "bajkpaker.db")
+    DB_PATH = os.path.join(pathlib.Path(__file__).parent.absolute(), "product_service.db")
 
 # Build the SQLite database URL
 DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"
 
 print("DATABASE_URL:", DATABASE_URL)
+print("DB_PATH:", DB_PATH)
 
 # Create async engine with optimized settings for very low memory
 engine = create_async_engine(

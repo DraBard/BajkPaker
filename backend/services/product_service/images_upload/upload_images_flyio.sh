@@ -1,9 +1,15 @@
 #!/bin/bash
 
-# Script to upload images to fly.io volume
+# Script to upload images to fly.io volume (SQLite version)
 
 # Ensure script exits on error
 set -e
+
+# Check for flyctl CLI
+if ! command -v flyctl &> /dev/null; then
+  echo "Error: flyctl CLI not found. Please install flyctl and try again."
+  exit 1
+fi
 
 echo "Starting upload of images to fly.io volume"
 
@@ -24,15 +30,34 @@ if [ -z "$(ls -A $LOCAL_IMAGES_DIR)" ]; then
   exit 1
 fi
 
+# Retry helper for flyctl commands
+flyctl_retry() {
+  local max_attempts=5
+  local attempt=1
+  local delay=8
+  while [ $attempt -le $max_attempts ]; do
+    "$@"
+    status=$?
+    if [ $status -eq 0 ]; then
+      return 0
+    fi
+    echo "Attempt $attempt/$max_attempts failed. Retrying in $delay seconds..."
+    sleep $delay
+    attempt=$((attempt + 1))
+  done
+  echo "Error: Command failed after $max_attempts attempts: $*"
+  return 1
+}
+
 # Ensure the destination directory exists on fly.io
 echo "Ensuring destination directory exists on fly.io..."
-fly ssh console -a product-service -C "mkdir -p /app/static/images"
+flyctl_retry flyctl ssh console -a product-service -C "mkdir -p /data/static/images"
 
 # Count files for progress tracking
 FILE_COUNT=$(find "$LOCAL_IMAGES_DIR" -type f | wc -l)
 echo "Preparing to upload $FILE_COUNT files..."
 
-# Upload each file individually using fly sftp
+# Upload each file individually using flyctl sftp
 echo "Uploading images to fly.io instance..."
 for img in "$LOCAL_IMAGES_DIR"/*; do
   if [ -f "$img" ]; then
@@ -41,10 +66,10 @@ for img in "$LOCAL_IMAGES_DIR"/*; do
     
     # Create a temporary sftp batch file
     SFTP_COMMANDS=$(mktemp)
-    echo "put \"$img\" \"/app/static/images/$filename\"" > "$SFTP_COMMANDS"
+    echo "put \"$img\" \"/data/static/images/$filename\"" > "$SFTP_COMMANDS"
     
-    # Execute the sftp commands
-    fly sftp shell -a product-service < "$SFTP_COMMANDS"
+    # Use flyctl sftp with retry
+    flyctl_retry flyctl sftp shell -a product-service < "$SFTP_COMMANDS"
     
     # Remove the temporary file
     rm "$SFTP_COMMANDS"
@@ -53,16 +78,16 @@ done
 
 # Verify the upload by counting files - local pipe fix
 echo "Verifying upload..."
-UPLOADED_COUNT=$(fly ssh console -a product-service -C "find /app/static/images -type f" | wc -l)
+UPLOADED_COUNT=$(flyctl_retry flyctl ssh console -a product-service -C "find /data/static/images -type f" | wc -l)
 echo "Uploaded $UPLOADED_COUNT of $FILE_COUNT files"
 
 # Set proper permissions
 echo "Setting permissions..."
-fly ssh console -a product-service -C "chmod -R 755 /app/static/images"
+flyctl_retry flyctl ssh console -a product-service -C "chmod -R 755 /data/static/images"
 
 # List the images in the destination directory to confirm
 echo "Listing images in destination directory..."
-fly ssh console -a product-service -C "ls -l /app/static/images"
+flyctl_retry flyctl ssh console -a product-service -C "ls -l /data/static/images"
 
 echo "Image upload complete!"
 echo "Now you need to update the database with bike data and image metadata"

@@ -46,29 +46,23 @@ if __name__ == "__main__":
     parser.add_argument(
         "--db-path",
         type=str,
-        default="/data/bajkpaker.db",
+        default=None,
         help="Path to SQLite database file",
-    )
-    parser.add_argument(
-        "--service",
-        type=str,
-        default="product",
-        help="Service name (product, order, user)",
     )
     args = parser.parse_args()
 
-    # For development, use a local path if not specified as absolute
-    if not os.path.isabs(args.db_path):
-        if "ENVIRONMENT" in os.environ and os.environ["ENVIRONMENT"] == "production":
-            # In production, use the data volume
-            db_path = f"/data/{args.service}_service.db"
-        else:
-            # In development, use a local path
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            db_path = os.path.join(
-                script_dir, "..", "data", f"{args.service}_service.db"
+    # Always resolve the db_path relative to this script's directory if not absolute
+    if args.db_path is None:
+        # Default to ../services/product_service/product_service.db relative to this script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        db_path = os.path.abspath(
+            os.path.join(
+                script_dir, "..", "services", "product_service", "product_service.db"
             )
-            os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        )
+    elif not os.path.isabs(args.db_path):
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        db_path = os.path.abspath(os.path.join(script_dir, args.db_path))
     else:
         db_path = args.db_path
 

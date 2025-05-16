@@ -33,9 +33,8 @@ docker run -d \
 # Deploy the application
 flyctl deploy
 
-# Create volumes for persistent storage
-flyctl volumes create product_images --size 2 --region waw
-flyctl volumes create product_data --size 1 --region waw
+# Create a single volume for both DB and images
+flyctl volumes create product_data --size 2 --region waw
 
 # Check application status
 flyctl status
@@ -45,12 +44,16 @@ flyctl status
 1. Check if the application is running:
 ```bash
 flyctl status -a product-service
+flyctl status -a user-service
+flyctl status -a order-service
 ```
 
 2. Check if the files are in the volume:
 ```bash
-fly ssh console -a product-service -C "ls -la /app/static/images"
+fly ssh console -a product-service -C "ls -la /data/static/images"
 fly ssh console -a product-service -C "ls -la /data"
+fly ssh console -a user-service -C "ls -la /data"
+fly ssh console -a order-service -C "ls -la /data"
 ```
 
 3. Upload images:
@@ -63,13 +66,22 @@ bash upload_images_flyio.sh
 python update_image_metadata.py image_metadata.json
 ```
 
+5. Initialize SQLite databases:
+```bash
+flyctl ssh console -a product-service -C "python /app/init_sqlite_db.py --db-path /data/product_service.db"
+flyctl ssh console -a user-service -C "python /app/init_sqlite_db.py --db-path /data/user_service.db"
+flyctl ssh console -a order-service -C "python /app/init_sqlite_db.py --db-path /data/order_service.db"
+```
+
 ### Monitoring and Debugging
 ```bash
 # View logs
 flyctl logs
 
 # Access the SQLite database console
-fly ssh console -a product-service -C "sqlite3 /data/bajkpaker.db"
+fly ssh console -a product-service -C "sqlite3 /data/product_service.db"
+fly ssh console -a user-service -C "sqlite3 /data/user_service.db"
+fly ssh console -a order-service -C "sqlite3 /data/order_service.db"
 
 # Common SQLite commands in the console:
 # .tables             - Show all tables

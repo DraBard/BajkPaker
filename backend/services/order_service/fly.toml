@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for order-service on 2025-03-01T21:12:04+01:00
+# fly.toml app configuration file generated for order-service-dawn-sound-7417 on 2025-05-16T14:30:57+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'order-service'
+app = 'order-service-dawn-sound-7417'
 primary_region = 'waw'
 
 [build]

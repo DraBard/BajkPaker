@@ -5,7 +5,7 @@
 ### Initialize SQLite Database
 ```bash
 # Create SQLite database for development
-python init_sqlite_db.py --db-path ./data/bajkpaker.db
+python init_sqlite_db.py --db-path ../services/product_service/product_service.db
 ```
 
 ### Docker-based Development (Optional)
@@ -27,9 +27,7 @@ docker run -d \
 ### Creating Volumes for SQLite
 ```bash
 # Create volumes for each service's database
-flyctl volumes create product_data --size 1 --region waw
-flyctl volumes create user_data --size 1 --region waw
-flyctl volumes create order_data --size 1 --region waw
+flyctl volumes create product_data --size 2 --region waw
 ```
 
 ### Deploying Services
@@ -38,6 +36,7 @@ flyctl volumes create order_data --size 1 --region waw
 flyctl deploy --config path/to/frontend/fly.toml
 flyctl deploy --config path/to/product-service/fly.toml
 flyctl deploy --config path/to/user-service/fly.toml
+flyctl deploy --config path/to/order-service/fly.toml
 ```
 
 ### Uploading Images and Initializing Database
@@ -46,10 +45,10 @@ flyctl deploy --config path/to/user-service/fly.toml
 cd path/to/product_service
 bash upload_images_flyio.sh
 
-# Initialize database directly on the fly.io instance
-flyctl ssh console -a product-service -C "python /app/init_sqlite_db.py --db-path /data/bajkpaker.db"
+# Initialize databases directly on the fly.io instances
+flyctl ssh console -a product-service -C "python /app/init_sqlite_db.py --db-path /data/product_service.db"
 
-# Update the database with metadata
+# Update the product database with metadata
 python update_image_metadata.py image_metadata.json
 ```
 
@@ -58,7 +57,7 @@ python update_image_metadata.py image_metadata.json
 #### Accessing the SQLite Database
 ```bash
 # Connect to the SQLite database on fly.io
-flyctl ssh console -a product-service -C "sqlite3 /data/bajkpaker.db"
+flyctl ssh console -a product-service -C "sqlite3 /data/product_service.db"
 ```
 
 #### Common SQLite Commands
@@ -74,6 +73,6 @@ SELECT * FROM bikes LIMIT 5;  # Example query
 #### Backing Up the Database
 ```bash
 # Create a backup of the SQLite database
-flyctl ssh console -a product-service -C "sqlite3 /data/bajkpaker.db '.backup /tmp/bajkpaker_backup.db'"
-flyctl ssh sftp get -a product-service /tmp/bajkpaker_backup.db ./local_backup.db
+flyctl ssh console -a product-service -C "sqlite3 /data/product_service.db '.backup /tmp/product_service_backup.db'"
+flyctl ssh sftp get -a product-service /tmp/product_service_backup.db ./local_backup.db
 ```

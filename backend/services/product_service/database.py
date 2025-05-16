@@ -20,7 +20,9 @@ if ENVIRONMENT == "production":
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 else:
     # Local development path
-    DB_PATH = os.path.join(pathlib.Path(__file__).parent.absolute(), "product_service.db")
+    DB_PATH = os.path.join(
+        pathlib.Path(__file__).parent.absolute(), "product_service.db"
+    )
 
 # Build the SQLite database URL
 DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"

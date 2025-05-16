@@ -30,9 +30,7 @@ elif ENVIRONMENT == "production":
     DB_PATH = "/app/product_service.db"
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 else:
-    DB_PATH = os.path.join(
-        Path(__file__).parents[1], "product_service.db"
-    )
+    DB_PATH = os.path.join(Path(__file__).parents[1], "product_service.db")
 
 print(f"Using database: {DB_PATH}")
 

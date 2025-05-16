@@ -26,15 +26,64 @@ docker run -d \
   -p 8001:8001 \
   product-service
 
+# Fly.io Deployment Commands for SQLite Based BajkPaker
+
+### Initial Deployment
+```bash
+# Deploy the application
+flyctl deploy
+
+# Create volumes for persistent storage
+flyctl volumes create product_images --size 2 --region waw
+flyctl volumes create product_data --size 1 --region waw
+
+# Check application status
+flyctl status
+```
+
 ### After deployment
-Create volume to be able to store images etc.
-1. Create the Fly Volume:
-flyctl volumes create product_images --size 10 --region waw
+1. Check if the application is running:
+```bash
+flyctl status -a product-service
+```
+
 2. Check if the files are in the volume:
+```bash
 fly ssh console -a product-service -C "ls -la /app/static/images"
+fly ssh console -a product-service -C "ls -la /data"
+```
+
 3. Upload images:
+```bash
 bash upload_images_flyio.sh
-4. open proxy:
-flyctl proxy 3306 -a bajkpaker-mysql
-5. Run the metadata update script:
+```
+
+4. Run the metadata update script:
+```bash
 python update_image_metadata.py image_metadata.json
+```
+
+### Monitoring and Debugging
+```bash
+# View logs
+flyctl logs
+
+# Access the SQLite database console
+fly ssh console -a product-service -C "sqlite3 /data/bajkpaker.db"
+
+# Common SQLite commands in the console:
+# .tables             - Show all tables
+# .schema tablename   - Show table structure
+# .quit               - Exit SQLite console
+```
+
+### Running locally with Docker
+```bash
+docker build -t product-service .
+
+docker run -d \
+  -p 8001:8001 \
+  -v "$(pwd)/data:/data" \
+  -v "$(pwd)/static/images:/app/static/images" \
+  product-service
+```

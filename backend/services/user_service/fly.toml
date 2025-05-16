@@ -11,11 +11,14 @@ primary_region = 'waw'
 [env]
   ALLOWED_ORIGINS = 'https://bajkpaker.fly.dev,https://order-service.fly.dev,https://product-service.fly.dev'
   DB_ECHO = 'False'
-  DB_HOST = 'bajkpaker-mysql.fly.dev'
-  DB_NAME = 'bajkpaker_dev'
-  DB_PORT = '3306'
-  DB_USER = 'bajkpaker'
   ENVIRONMENT = 'production'
+  # SQLite-specific config
+  SQLITE_PATH = '/data/user_service.db'
+
+# Mount volume for SQLite database
+[[mounts]]
+  source = 'user_data'
+  destination = '/data'
 
 [http_service]
   internal_port = 8003

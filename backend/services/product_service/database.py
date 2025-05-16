@@ -4,39 +4,36 @@ import os
 from typing import AsyncGenerator
 import time
 import logging
+import pathlib
 
 logger = logging.getLogger(__name__)
 
-# In production, these variables will come from Fly.io secrets/env
-DB_USER = os.getenv("DB_USER", "bajkpaker")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "your_password")
-DB_HOST = os.getenv(
-    "DB_HOST", "bajkpaker-mysql.internal"
-)  # Will be bajkpaker-mysql.internal in prod
-DB_PORT = os.getenv("DB_PORT", "3306")
-DB_NAME = os.getenv("DB_NAME", "bajkpaker_dev")
+# Environment variables
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 DB_ECHO = os.getenv("DB_ECHO", "False").lower() == "true"
 
-# Build the database URL dynamically
-DATABASE_URL = f"mysql+asyncmy://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+# SQLite database path configuration
+# For fly.io, store the database in the persistent volume
+if ENVIRONMENT == "production":
+    # Use the mounted volume path in fly.io
+    DB_PATH = "/data/bajkpaker.db"
+    # Create directory if it doesn't exist
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+else:
+    # Local development path
+    DB_PATH = os.path.join(pathlib.Path(__file__).parent.absolute(), "bajkpaker.db")
+
+# Build the SQLite database URL
+DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"
 
 print("DATABASE_URL:", DATABASE_URL)
 
-# Create async engine with extremely optimized settings for very low memory
+# Create async engine with optimized settings for very low memory
 engine = create_async_engine(
     DATABASE_URL,
     echo=DB_ECHO,
-    pool_pre_ping=True,
-    pool_recycle=30,  # Recycle connections more frequently
-    pool_size=1,  # Absolute minimum pool size
-    max_overflow=1,  # Minimum overflow connections
-    pool_timeout=20,  # Shorter timeout
-    # Additional options to reduce memory usage
-    connect_args={
-        "connect_timeout": 10,  # MySQL connection timeout in seconds
-        # Low memory client settings
-        "client_flag": 0,  # Disable unnecessary client flags
-    },
+    # SQLite connection options
+    connect_args={"check_same_thread": False},  # Allow multithreaded access
 )
 
 # Create async session factory
@@ -67,8 +64,6 @@ async def get_db(max_retries=3, retry_delay=1) -> AsyncGenerator[AsyncSession, N
                 except Exception as e:
                     await session.rollback()
                     raise e
-                finally:
-                    await session.close()  # Explicitly close to free up resources quickly
         except Exception as e:
             last_error = e
             retries += 1

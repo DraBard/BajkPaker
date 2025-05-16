@@ -1,46 +1,55 @@
--- Create tables based on SQLAlchemy models
+-- SQLite schema creation
 CREATE TABLE IF NOT EXISTS bikes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    price INT NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    price INTEGER NOT NULL,
     description TEXT,
-    bought BOOLEAN DEFAULT FALSE
+    bought BOOLEAN DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS bike_images (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    bike_id INT,
-    image_url VARCHAR(2048) NOT NULL,
-    is_main BOOLEAN DEFAULT FALSE,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    bike_id INTEGER,
+    image_url TEXT NOT NULL,
+    is_main BOOLEAN DEFAULT 0,
     FOREIGN KEY (bike_id) REFERENCES bikes(id)
 );
 
 CREATE TABLE IF NOT EXISTS cart_items (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    bike_id INT,
-    quantity INT NOT NULL,
-    session_id VARCHAR(255) NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    bike_id INTEGER,
+    quantity INTEGER NOT NULL,
+    session_id TEXT NOT NULL,
     FOREIGN KEY (bike_id) REFERENCES bikes(id)
 );
 
 CREATE TABLE IF NOT EXISTS orders (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    total_price INT NOT NULL,
-    status VARCHAR(50) DEFAULT 'pending'
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    total_price INTEGER NOT NULL,
+    status TEXT DEFAULT 'pending'
 );
 
 CREATE TABLE IF NOT EXISTS order_items (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT,
-    bike_id INT,
-    quantity INT NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER,
+    bike_id INTEGER,
+    quantity INTEGER NOT NULL,
     FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (bike_id) REFERENCES bikes(id)
 );
 
 CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(124) UNIQUE,
-    password VARCHAR(255),
-    email VARCHAR(255) UNIQUE NOT NULL
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
+    password TEXT,
+    email TEXT UNIQUE NOT NULL
 );
+
+-- Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_bike_images_bike_id ON bike_images(bike_id);
+CREATE INDEX IF NOT EXISTS idx_cart_items_bike_id ON cart_items(bike_id);
+CREATE INDEX IF NOT EXISTS idx_cart_items_session_id ON cart_items(session_id);
+CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_items_bike_id ON order_items(bike_id);
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);

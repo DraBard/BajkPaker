@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Deploy all components to fly.io
+# Deploy all components to fly.io (SQLite version)
 # Author: BajkPaker
 
 # Exit on error - we'll handle errors ourselves
@@ -9,7 +9,7 @@ set +e
 # Store the project root directory
 SCRIPT_DIR=$(dirname "$0")
 PROJECT_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
-echo "🚀 Starting removal from project root: $PROJECT_ROOT"
+echo "🚀 Starting deployment from project root: $PROJECT_ROOT"
 
 # Change to project root to ensure relative paths work as expected
 cd "$PROJECT_ROOT" || exit 1
@@ -32,6 +32,14 @@ step() {
 check_app_exists() {
   local app_name=$1
   flyctl status -a "$app_name" &>/dev/null
+  return $?
+}
+
+# Function to check if a volume exists
+check_volume_exists() {
+  local app_name=$1
+  local volume_name=$2
+  flyctl volumes list -a "$app_name" 2>/dev/null | grep -q "$volume_name"
   return $?
 }
 
@@ -178,19 +186,8 @@ else
   verify_app "bajkpaker" 3 20
 fi
 
-# Deploy Database
-step 2 "Deploying Database"
-if check_app_exists "bajkpaker-mysql"; then
-  echo "🔍 Database app 'bajkpaker-mysql' already exists."
-  echo "🔄 Deploying new version..."
-  run_in_dir "backend/database" "flyctl deploy --yes --now" "Deploying MySQL database" true
-else
-  echo "🆕 Creating new database app..."
-  launch_fly_app "backend/database" "Launching MySQL database" "bajkpaker-mysql"
-fi
-
 # Deploy Product Service
-step 3 "Deploying Product Service"
+step 2 "Deploying Product Service"
 if check_app_exists "product-service"; then
   echo "🔍 Product service app 'product-service' already exists."
   echo "🔄 Deploying new version..."
@@ -202,55 +199,38 @@ else
   verify_app "product-service" 3 20
 fi
 
-# Make sure the volume exists for the product service
-step 4 "Checking and Creating Volume"
+# Create volumes for images and SQLite database
+step 3 "Creating Volumes"
 if check_app_exists "product-service"; then
-  run_in_dir "backend/services/product_service" "flyctl volumes list | grep -q 'product_images' || flyctl volumes create product_images --size 1 --region waw --yes" "Ensuring product_images volume exists" true
-
-  # Upload images to product service volume
-  step 5 "Uploading Images"
-  if check_app_exists "product-service"; then
-    run_in_dir "backend/services/product_service/images_upload" "bash upload_images_flyio.sh" "Uploading product images to fly.io volume" true
+  # Create images volume
+  if ! check_volume_exists "product-service" "product_images"; then
+    run_in_dir "backend/services/product_service" "flyctl volumes create product_images --size 1 --region waw --yes" "Creating product_images volume" true
   else
-    echo "❌ Product service app 'product-service' does not exist. Skipping image upload."
-    GLOBAL_ERROR=1
+    echo "✅ Volume 'product_images' already exists."
   fi
-else
-  echo "❌ Product service app 'product-service' does not exist. Skipping volume creation and image upload."
-  GLOBAL_ERROR=1
-fi
-
-# Start database proxy in a separate terminal
-step 6 "Database Proxy Instructions"
-echo "📡 Database proxy needs to be run in a separate terminal."
-echo ""
-echo "⚠️ IMPORTANT: Please run the following command in a separate terminal:"
-echo "    flyctl proxy 3306 -a bajkpaker-mysql"
-echo "and asure there is no local docker mysql instance running on port 3306."
-echo ""
-echo "🔍 This will forward the remote MySQL database port to your local machine."
-echo "⏱️ After starting the proxy, return to this terminal and press Enter to continue..."
-
-# Wait for user confirmation
-read -p "Press Enter after starting the database proxy in a separate terminal... " 
-
-# Check if the database proxy port is accessible
-if nc -z -w 5 localhost 3306 2>/dev/null; then
-  echo "✅ Database proxy connection detected on port 3306."
+  
+  # Create SQLite data volume
+  if ! check_volume_exists "product-service" "product_data"; then
+    run_in_dir "backend/services/product_service" "flyctl volumes create product_data --size 1 --region waw --yes" "Creating product_data volume" true
+  else
+    echo "✅ Volume 'product_data' already exists."
+  fi
+  
+  # Upload images to product service volume
+  step 4 "Uploading Images"
+  run_in_dir "backend/services/product_service/images_upload" "bash upload_images_flyio.sh" "Uploading product images to fly.io volume" true
+  
+  # Initialize SQLite database on the server
+  step 5 "Initializing SQLite Database"
+  run_in_dir "backend/services/product_service" "flyctl ssh console -a product-service -C 'python /app/init_sqlite_db.py'" "Initializing SQLite database" true
   
   # Update database with image metadata
-  step 7 "Updating Database"
-  run_in_dir "backend/services/product_service/images_upload" "python update_image_metadata.py image_metadata.json" "Updating database with bike and image data" true
+  step 6 "Updating Database with Metadata"
+  run_in_dir "backend/services/product_service" "flyctl ssh console -a product-service -C 'cd /app && python images_upload/update_image_metadata.py images_upload/image_metadata.json'" "Updating database with bike and image data" true
 else
-  echo "❌ Unable to connect to database on port 3306. Please verify:"
-  echo "  1. You've started the proxy in another terminal"
-  echo "  2. The command executed successfully"
-  echo "  3. The database app 'bajkpaker-mysql' exists"
+  echo "❌ Product service app 'product-service' does not exist. Skipping volume creation and setup."
   GLOBAL_ERROR=1
 fi
-
-echo ""
-echo "⚠️ REMINDER: Don't forget to close the proxy terminal when you're finished."
 
 echo ""
 if [ $GLOBAL_ERROR -eq 0 ]; then
@@ -263,4 +243,4 @@ else
   echo "🌐 Frontend: https://bajkpaker.fly.dev"
   echo "🔄 Product service: https://product-service.fly.dev"
 fi
-echo "" 
+echo ""

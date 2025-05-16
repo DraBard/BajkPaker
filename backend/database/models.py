@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Float, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Float, Boolean, Text
 from sqlalchemy.orm import relationship, declarative_base
 
 Base = declarative_base()
@@ -7,9 +7,9 @@ Base = declarative_base()
 class Bike(Base):
     __tablename__ = "bikes"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255), nullable=False)
+    name = Column(String, nullable=False)  # SQLite doesn't require length constraints
     price = Column(Integer, nullable=False)
-    description = Column(String(10000), nullable=True)  # Specify length for VARCHAR
+    description = Column(Text, nullable=True)  # Use Text for longer content in SQLite
     bought = Column(Boolean, default=False)
     images = relationship("BikeImage", back_populates="bike")
     cart_items = relationship("CartItem", back_populates="bike")
@@ -20,7 +20,7 @@ class BikeImage(Base):
     __tablename__ = "bike_images"
     id = Column(Integer, primary_key=True, index=True)
     bike_id = Column(Integer, ForeignKey("bikes.id"))
-    image_url = Column(String(2048), nullable=False)  # Limit URL length
+    image_url = Column(String, nullable=False)  # SQLite doesn't need length limits
     is_main = Column(Boolean, default=False)
     bike = relationship("Bike", back_populates="images")
 
@@ -30,7 +30,7 @@ class CartItem(Base):
     id = Column(Integer, primary_key=True, index=True)
     bike_id = Column(Integer, ForeignKey("bikes.id"))
     quantity = Column(Integer, nullable=False)
-    session_id = Column(String(255), nullable=False)  # NEW: session identifier
+    session_id = Column(String, nullable=False)
     bike = relationship("Bike", back_populates="cart_items")
 
 
@@ -38,7 +38,7 @@ class Order(Base):
     __tablename__ = "orders"
     id = Column(Integer, primary_key=True, index=True)
     total_price = Column(Integer, nullable=False)
-    status = Column(String(50), default="pending")  # Limit status length
+    status = Column(String, default="pending")
     items = relationship("OrderItem", back_populates="order")
 
 
@@ -55,8 +55,6 @@ class OrderItem(Base):
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String(124), unique=True, index=True)  # Limit username length
-    password = Column(String(255))  # Limit password length
-    email = Column(
-        String(255), unique=True, index=True, nullable=False
-    )  # Limit email length
+    username = Column(String, unique=True, index=True)
+    password = Column(String)
+    email = Column(String, unique=True, index=True, nullable=False)

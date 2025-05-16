@@ -1,68 +1,79 @@
-locally:
+# SQLite Database Setup Instructions
 
-Password are passed during building and are set as build args in the dockerfile
+## Local Development
 
-docker build -t  bajkpaker-mysql \
-  --build-arg DB_PASSWORD=BajkPaker93.83 \
-  --build-arg DB_ROOT_PASSWORD=BajkPaker93.83 \
-  .
+### Initialize SQLite Database
+```bash
+# Create SQLite database for development
+python init_sqlite_db.py --db-path ./data/bajkpaker.db
+```
 
+### Docker-based Development (Optional)
+For those who still want to use Docker for development:
+
+```bash
+# Build a lightweight Python Alpine container with SQLite
+docker build -t bajkpaker-sqlite -f Dockerfile.sqlite .
+
+# Run the container with mounted volume for database persistence
 docker run -d \
-  -p 3306:3306 \
-  bajkpaker-mysql                       -> To open the port locally, i.e. docker is on port 3306 and the local machine has to open port 3306 as well to access the webpage
+  -p 8000:8000 \
+  -v "$(pwd)/data:/data" \
+  bajkpaker-sqlite
+```
 
+## Fly.io Deployment
 
+### Creating Volumes for SQLite
+```bash
+# Create volumes for each service's database
+flyctl volumes create product_data --size 1 --region waw
+flyctl volumes create user_data --size 1 --region waw
+flyctl volumes create order_data --size 1 --region waw
+```
 
-passing the password to container probably not needed, only during building to set the password.
+### Deploying Services
+```bash
+# Deploy each service
+flyctl deploy --config path/to/frontend/fly.toml
+flyctl deploy --config path/to/product-service/fly.toml
+flyctl deploy --config path/to/user-service/fly.toml
+```
 
-docker run -d \
-  -p 3306:3306 \
-  -e DB_PASSWORD=BajkPaker93.83 \
-  -e DB_ROOT_PASSWORD=BajkPaker93.83 \
-  bajkpaker-mysql      
+### Uploading Images and Initializing Database
+```bash
+# Upload product images
+cd path/to/product_service
+bash upload_images_flyio.sh
 
-  ### DEPLOYING
+# Initialize database directly on the fly.io instance
+flyctl ssh console -a product-service -C "python /app/init_sqlite_db.py --db-path /data/bajkpaker.db"
 
-  flyctl apps create bajkpaker-mysql
-  flyctl deploy --app bajkpaker-mysql
+# Update the database with metadata
+python update_image_metadata.py image_metadata.json
+```
 
-  #### To test connection on fly.io
+### SQLite Management
 
-  Create tunnel, because it is on HTTPS I need a local tunnel to create a proxy that can connect with db on fly.io
-  Remember it has to be on separate terminal
+#### Accessing the SQLite Database
+```bash
+# Connect to the SQLite database on fly.io
+flyctl ssh console -a product-service -C "sqlite3 /data/bajkpaker.db"
+```
 
-  flyctl proxy 3306
-    # Correct proxy command syntax:
-  fly proxy 3306:3306 -a bajkpaker-mysql
-  # Or alternative format:
-  # flyctl proxy 3306:3306 --app bajkpaker-mysql
+#### Common SQLite Commands
+```
+.tables           # List all tables
+.schema [table]   # Show schema for a table
+.mode column      # Format output as columns
+.headers on       # Show column headers
+SELECT * FROM bikes LIMIT 5;  # Example query
+.quit             # Exit SQLite shell
+```
 
-  Open new terminal and:
-
-  mysql -h 127.0.0.1 -P 3306 -u bajkpaker -p
-
-  for mariadb:
-  mysql -h 127.0.0.1 -P 3306 -u bajkpaker -p --enable-cleartext-plugin
-
-  SHOW DATABASES;
-  USE bajkpaker_dev;
-  SHOW TABLES;
-  DESC table_name;
-
-
-
-
-Prompt:
-  In order to deploy this project on fly.io I have to do the following things.
-  1. Launch @fly.toml frontend with command 'flyctl launch'
-  2. Launch@fly.toml database with command 'flyctl launch'
-  3. launch product-service @fly.toml with command 'flyctl launch'
-  4. Then I have to upload the images on the product service volume using @upload_images_flyio.sh 
-  5. Then open proxy on database with 'flyctl proxy 3306'
-  6. Update the database@update_image_metadata.py 
-  Create one script that will do it with only one launch. Remember each of these files has to be launched from a folder level terminal and they are in different directiores.
-
-IN DEBUGG MODE:
-
-to connect to db:
-docker exec -it bajkpaker-mysql mysql -u bajkpaker -p
+#### Backing Up the Database
+```bash
+# Create a backup of the SQLite database
+flyctl ssh console -a product-service -C "sqlite3 /data/bajkpaker.db '.backup /tmp/bajkpaker_backup.db'"
+flyctl ssh sftp get -a product-service /tmp/bajkpaker_backup.db ./local_backup.db
+```

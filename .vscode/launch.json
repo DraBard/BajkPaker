@@ -20,11 +20,7 @@
             "justMyCode": false,
             "cwd": "${workspaceFolder}/backend/services/product_service",
             "env": {
-                "DB_HOST": "localhost",
-                "DB_PORT": "3306",
-                "DB_USER": "bajkpaker",
-                "DB_PASSWORD": "BajkPaker93.83",
-                "DB_NAME": "bajkpaker_dev",
+                "SQLITE_PATH": "${workspaceFolder}/backend/data/product_service.db",
                 "ALLOWED_ORIGINS": "http://localhost:3000",
                 "ENVIRONMENT": "development",
                 "DB_ECHO": "True"
@@ -39,11 +35,7 @@
             "justMyCode": false,
             "cwd": "${workspaceFolder}/backend/services/order_service",
             "env": {
-                "DB_HOST": "localhost",
-                "DB_PORT": "3306",
-                "DB_USER": "bajkpaker",
-                "DB_PASSWORD": "BajkPaker93.83",
-                "DB_NAME": "bajkpaker_dev",
+                "SQLITE_PATH": "${workspaceFolder}/backend/data/order_service.db",
                 "FRONTEND_URL": "http://localhost:8080",
                 "ENVIRONMENT": "development"
             }
@@ -57,21 +49,22 @@
             "justMyCode": false,
             "cwd": "${workspaceFolder}/backend/services/user_service",
             "env": {
-                "DB_HOST": "localhost",
-                "DB_PORT": "3306",
-                "DB_USER": "bajkpaker",
-                "DB_PASSWORD": "BajkPaker93.83",
-                "DB_NAME": "bajkpaker_dev",
+                "SQLITE_PATH": "${workspaceFolder}/backend/data/user_service.db",
                 "ENVIRONMENT": "development"
             }
         },
         {
-            "name": "MySQL Database Setup",
-            "type": "node",
+            "name": "SQLite Database Setup",
+            "type": "debugpy",
             "request": "launch",
-            "runtimeExecutable": "${workspaceFolder}/.vscode/setup-mysql.js",
-            "skipFiles": ["<node_internals>/**"],
-            "console": "integratedTerminal"
+            "program": "${workspaceFolder}/backend/database/init_sqlite_db.py",
+            "args": [
+                "--db-path", "${workspaceFolder}/backend/data/product_service.db",
+                "--service", "product"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}/backend/database"
         },
         {
             "name": "Update Image Metadata",
@@ -82,11 +75,7 @@
             "justMyCode": false,
             "cwd": "${workspaceFolder}/backend/services/product_service/images_upload",
             "env": {
-                "DB_HOST": "localhost",
-                "DB_PORT": "3306",
-                "DB_USER": "bajkpaker",
-                "DB_PASSWORD": "BajkPaker93.83",
-                "DB_NAME": "bajkpaker_dev",
+                "SQLITE_PATH": "${workspaceFolder}/backend/data/product_service.db",
                 "ENVIRONMENT": "development"
             }
         }
@@ -95,15 +84,15 @@
         {
             "name": "Run All Services",
             "configurations": [
-                "MySQL Database Setup",
+                "SQLite Database Setup",
                 "Update Image Metadata",
                 "Product Service",
                 // "Order Service", 
                 // "User Service",
                 "Frontend"
             ],
-            "stopAll": true,
-            "preLaunchTask": "wait-mysql"
+            "stopAll": true
+            // Removed preLaunchTask as we don't need to wait for MySQL
         }
     ],
 }

@@ -29,6 +29,14 @@ app_exists() {
   return $?
 }
 
+# Function to check if a volume exists
+volume_exists() {
+  local app_name=$1
+  local volume_name=$2
+  flyctl volumes list -a "$app_name" 2>/dev/null | grep -q "$volume_name"
+  return $?
+}
+
 # Function to run a command in a specific directory
 run_in_dir() {
   local dir=$1
@@ -46,6 +54,25 @@ run_in_dir() {
   local result=$?
   cd "$PROJECT_ROOT"
   return $result
+}
+
+# Function to remove a Fly.io volume
+remove_volume() {
+  local app_name=$1
+  local volume_name=$2
+  
+  if volume_exists "$app_name" "$volume_name"; then
+    echo "✅ Volume '$volume_name' found, proceeding with removal"
+    echo "🔧 Running: flyctl volumes delete $volume_name -a $app_name --yes"
+    flyctl volumes delete "$volume_name" -a "$app_name" --yes
+    if [ $? -eq 0 ]; then
+      echo "✅ Successfully removed volume $volume_name"
+    else
+      echo "❌ Failed to remove volume $volume_name"
+    fi
+  else
+    echo "ℹ️ Volume '$volume_name' not found, skipping removal"
+  fi
 }
 
 # Function to remove a Fly.io app with error handling
@@ -79,13 +106,16 @@ remove_app() {
   cd "$PROJECT_ROOT"
 }
 
-# Remove Product Service
-step 1 "Removing Product Service"
-remove_app "backend/services/product_service" "product-service" "Removing product service from Fly.io"
+# Remove Product Service volumes first
+step 1 "Removing Product Service Volumes"
+if app_exists "product-service"; then
+  remove_volume "product-service" "product_images"
+  remove_volume "product-service" "product_data"
+fi
 
-# Remove Database
-step 2 "Removing Database"
-remove_app "backend/database" "bajkpaker-mysql" "Removing MySQL database from Fly.io"
+# Remove Product Service
+step 2 "Removing Product Service"
+remove_app "backend/services/product_service" "product-service" "Removing product service from Fly.io"
 
 # Remove Frontend
 step 3 "Removing Frontend"

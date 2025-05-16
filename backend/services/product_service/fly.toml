@@ -11,16 +11,18 @@ primary_region = 'waw'
 [env]
   ALLOWED_ORIGINS = 'https://bajkpaker.fly.dev'
   DB_ECHO = 'False'
-  DB_HOST = 'bajkpaker-mysql.internal'
-  DB_NAME = 'bajkpaker_dev'
-  DB_PASSWORD = 'BajkPaker93.83'
-  DB_PORT = '3306'
-  DB_USER = 'bajkpaker'
   ENVIRONMENT = 'production'
+  # SQLite-specific config
+  SQLITE_PATH = '/data/bajkpaker.db'
 
+# Mount two volumes - one for images, one for SQLite database
 [[mounts]]
   source = 'product_images'
   destination = '/app/static/images'
+
+[[mounts]]
+  source = 'product_data'
+  destination = '/data'
 
 [http_service]
   internal_port = 8001

@@ -1,0 +1,25 @@
+FROM python:3.10-alpine
+
+WORKDIR /app
+
+# Install SQLite and dependencies
+RUN apk add --no-cache sqlite sqlite-dev gcc musl-dev
+
+# Copy requirements and install Python packages
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code and database initialization scripts
+COPY ./init-scripts/ /app/init-scripts/
+COPY ./init_sqlite_db.py /app/
+
+# Create directory for SQLite database
+RUN mkdir -p /data
+VOLUME /data
+
+# Initialize database on container startup
+CMD ["python", "init_sqlite_db.py", "--db-path", "/data/bajkpaker.db"]
+
+# Health check using SQLite
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD sqlite3 /data/bajkpaker.db 'SELECT 1;' || exit 1

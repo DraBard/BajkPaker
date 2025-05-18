@@ -21,24 +21,25 @@ if not IS_PRODUCTION and not os.path.exists(DATA_DIR):
 DB_NAME = os.getenv("DB_NAME", "bajkpaker_dev.db")
 DB_PATH = os.path.join(DATA_DIR, DB_NAME)
 
+
 def init_database():
     """Initialize the SQLite database with schema"""
     print(f"Initializing SQLite database at: {DB_PATH}")
-    
+
     # Read the schema file
     schema_path = os.path.join(script_dir, "init-scripts", "01-schema.sql")
     with open(schema_path, "r") as f:
         schema_sql = f.read()
-    
+
     # Create and initialize the database
     conn = None
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
-        
+
         # Execute the schema SQL
         cursor.executescript(schema_sql)
-        
+
         # Commit the changes
         conn.commit()
         print("✅ Database initialized successfully!")
@@ -51,12 +52,13 @@ def init_database():
         if conn:
             conn.close()
 
+
 if __name__ == "__main__":
     # Check if database already exists
     if os.path.exists(DB_PATH):
         response = input(f"Database already exists at {DB_PATH}. Reinitialize? (y/N): ")
-        if response.lower() != 'y':
+        if response.lower() != "y":
             print("Exiting without changes.")
             sys.exit(0)
-    
-    init_database() 
+
+    init_database()

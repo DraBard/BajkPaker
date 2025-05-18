@@ -42,7 +42,7 @@ DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"
 engine = create_async_engine(
     DATABASE_URL,
     echo=True,
-    connect_args={"check_same_thread": False}  # Required for SQLite
+    connect_args={"check_same_thread": False},  # Required for SQLite
 )
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
@@ -51,13 +51,19 @@ async def verify_database_tables(session):
     """Verify that required database tables exist"""
     try:
         # Check if bikes table exists by querying the SQLite master table
-        result = await session.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name='bikes'"))
+        result = await session.execute(
+            text("SELECT name FROM sqlite_master WHERE type='table' AND name='bikes'")
+        )
         if result.scalar() is None:
             print("❌ Error: bikes table does not exist in the database")
             return False
 
         # Check if bike_images table exists
-        result = await session.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name='bike_images'"))
+        result = await session.execute(
+            text(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='bike_images'"
+            )
+        )
         if result.scalar() is None:
             print("❌ Error: bike_images table does not exist in the database")
             return False

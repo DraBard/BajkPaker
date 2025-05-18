@@ -11,9 +11,12 @@ load_dotenv()
 app = FastAPI()
 
 # Configure CORS middleware
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "https://bajkpaker.fly.dev")
+allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.getenv("FRONTEND_URL", "https://bajkpaker.fly.dev")],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -34,9 +34,10 @@ app = FastAPI(
 )  # Disable docs in production
 
 # Get allowed origins from env or use default values
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "https://bajkpaker.fly.dev").split(",")
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "https://bajkpaker.fly.dev")
+allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
 
-logger.info(f"Allowed origins: {allowed_origins}")
+logger.info(f"Allowed origins for CORS: {allowed_origins}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -97,6 +98,12 @@ async def debug_mime_types():
         "jpeg": mimetypes.types_map.get(".jpeg", "not registered"),
         "png": mimetypes.types_map.get(".png", "not registered"),
     }
+
+
+@app.get("/debug/cors")
+async def debug_cors():
+    """Debug endpoint to show current CORS origins"""
+    return {"allowed_origins": allowed_origins}
 
 
 if __name__ == "__main__":

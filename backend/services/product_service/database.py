@@ -27,9 +27,6 @@ else:
 # Build the SQLite database URL
 DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"
 
-print("DATABASE_URL:", DATABASE_URL)
-print("DB_PATH:", DB_PATH)
-
 # Create async engine with optimized settings for very low memory
 engine = create_async_engine(
     DATABASE_URL,
@@ -61,11 +58,11 @@ async def get_db(max_retries=3, retry_delay=1) -> AsyncGenerator[AsyncSession, N
             async with AsyncSessionLocal() as session:
                 try:
                     yield session
-                    await session.commit()
-                    return  # Success, exit the function
+                    # Do not commit or return here; let FastAPI handle session cleanup
                 except Exception as e:
                     await session.rollback()
                     raise e
+                break  # Exit the retry loop after successful yield
         except Exception as e:
             last_error = e
             retries += 1

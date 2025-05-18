@@ -12,12 +12,15 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Add project root to Python path
-project_root = Path(__file__).resolve().parents[3]
-sys.path.append(str(project_root))
+# Adjust path resolution for both local and production environments
+if os.getenv("ENVIRONMENT") != "development":
+    app_dir = Path("/app")  # In production, files are in /app
+else:
+    app_dir = Path(__file__).resolve().parents[3] # Local development path
 
-# Import shared database models
-from database.models import Bike, BikeImage
+sys.path.append(str(app_dir))
+
+from models import Bike, BikeImage, Base  # added Base import
 
 # Environment variables
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
@@ -34,6 +37,12 @@ else:
 
 print(f"Using database: {DB_PATH}")
 
+# Add table creation to ensure the required tables exist
+async def create_tables():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    print("✅ Database tables created or already exist.")
+
 # Build the database URL
 DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"
 
@@ -49,22 +58,22 @@ AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=F
 async def verify_database_tables(session):
     """Verify that required database tables exist"""
     try:
-        # Check if bikes table exists (SQLite syntax)
+        # Check if bikes table exists using model's __tablename__ attribute
+        table_bikes = Bike.__tablename__
         result = await session.execute(
-            text("SELECT name FROM sqlite_master WHERE type='table' AND name='bikes'")
+            text(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_bikes}'")
         )
         if result.scalar() is None:
-            print("❌ Error: bikes table does not exist in the database")
+            print(f"❌ Error: {table_bikes} table does not exist in the database")
             return False
 
-        # Check if bike_images table exists
+        # Check if bike_images table exists using model's __tablename__ attribute
+        table_bike_images = BikeImage.__tablename__
         result = await session.execute(
-            text(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='bike_images'"
-            )
+            text(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_bike_images}'")
         )
         if result.scalar() is None:
-            print("❌ Error: bike_images table does not exist in the database")
+            print(f"❌ Error: {table_bike_images} table does not exist in the database")
             return False
 
         print("✅ Database tables verified")
@@ -75,6 +84,9 @@ async def verify_database_tables(session):
 
 
 async def update_bike_and_image_data(metadata_file):
+    # Create tables if missing
+    await create_tables()
+
     """Update both bikes and bike_images tables with data from the provided JSON file"""
 
     # Load metadata from JSON file

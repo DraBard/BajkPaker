@@ -8,3 +8,5 @@ PyYAML
 cryptography
 python-multipart
 aiofiles
+aiosqlite
+python-dotenv

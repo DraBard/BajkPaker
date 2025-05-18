@@ -13,6 +13,15 @@ fi
 
 echo "Starting upload of images to fly.io volume"
 
+# Check if the Fly.io app is running and healthy
+APP_STATUS=$(flyctl status -a product-service | grep "VM" | grep "started" || true)
+if [ -z "$APP_STATUS" ]; then
+  echo "Error: Fly.io app 'product-service' has no started VMs or is not healthy."
+  echo "Please deploy and ensure the app is running before uploading images."
+  echo "You can check the status with: flyctl status -a product-service"
+  exit 1
+fi
+
 # Local directory containing your images
 LOCAL_IMAGES_DIR="./static/images"
 

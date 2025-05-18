@@ -2,13 +2,17 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import router as user_router
+import os
+
+# Example CORS setup, adjust origins as needed
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "https://bajkpaker.fly.dev")
+allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
 
 app = FastAPI()
 
-# Example CORS setup, adjust origins as needed
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://bajkpaker.fly.dev:3000"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

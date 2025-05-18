@@ -160,14 +160,22 @@ verify_app() {
       echo "⏳ Waiting $wait_seconds seconds before retry..."
       sleep $wait_seconds
     fi
-    
-    if curl -s --head --max-time 10 "https://$app_name.fly.dev" | grep -q "200\|30[1-8]"; then
-      echo "✅ App '$app_name' is accessible at https://$app_name.fly.dev"
-      return 0
+
+    if [ "$app_name" = "product-service" ]; then
+      response=$(curl -s --max-time 10 "https://$app_name.fly.dev/healthz")
+      if [ "$response" = '{"status":"healthy"}' ]; then
+        echo "✅ App '$app_name' is healthy at /healthz"
+        return 0
+      fi
     else
-      attempts=$((attempts + 1))
-      echo "🔄 Attempt $attempts/$max_attempts: App not yet accessible"
+      if curl -s --head --max-time 10 "https://$app_name.fly.dev" | grep -q "200\|30[1-8]"; then
+        echo "✅ App '$app_name' is accessible at https://$app_name.fly.dev"
+        return 0
+      fi
     fi
+
+    attempts=$((attempts + 1))
+    echo "🔄 Attempt $attempts/$max_attempts: App not yet accessible"
   done
   
   echo "⚠️ Could not verify app '$app_name' is accessible after $max_attempts attempts."
@@ -258,17 +266,42 @@ fi
 
 # Upload images to product service volume
 step 6 "Uploading Images"
-run_in_dir "backend/services/product_service/images_upload" "bash upload_images_flyio.sh" "Uploading product images to fly.io volume" true
+attempt=1
+uploaded=false
+while [ $attempt -le 5 ] && [ "$uploaded" != "true" ]; do
+    echo "🔄 Attempt $attempt of 5: Checking if product-service is healthy..."
+    if verify_app "product-service" 1 0; then
+        echo "✅ Product service is healthy. Trying to upload images..."
+        if run_in_dir "backend/services/product_service/images_upload" "bash upload_images_flyio.sh" "Uploading product images to fly.io volume" true; then
+            uploaded=true
+            echo "✅ Image upload succeeded on attempt $attempt."
+        else
+            echo "❌ Image upload failed on attempt $attempt."
+        fi
+    else
+        echo "❌ Product service not healthy on attempt $attempt."
+    fi
+    if [ "$uploaded" != "true" ]; then
+        echo "⏳ Waiting 10 seconds before next attempt..."
+        sleep 10
+    fi
+    attempt=$((attempt + 1))
+done
+if [ "$uploaded" != "true" ]; then
+    echo "❌ All 5 image upload attempts failed. Skipping image upload."
+fi
 
 # Initialize SQLite databases on the server
 step 7 "Initializing SQLite Databases"
-run_in_dir "backend/services/product_service" "flyctl ssh console -a product-service -C 'python /app/init_sqlite_db.py --db-path /data/product_service.db'" "Initializing product service SQLite database" true
+run_in_dir "backend/services/product_service" "flyctl ssh console -a product-service -C 'python /app/init_db.py'" "Initializing product service SQLite database" true
 # run_in_dir "backend/services/user_service" "flyctl ssh console -a user-service -C 'python /app/init_sqlite_db.py --db-path /data/user_service.db'" "Initializing user service SQLite database" true
 # run_in_dir "backend/services/order_service" "flyctl ssh console -a order-service -C 'python /app/init_sqlite_db.py --db-path /data/order_service.db'" "Initializing order service SQLite database" true
 
 # Update product database with image metadata
+# Step 8: Updating Product Database with Metadata
+# Step 8: Update the command to properly set PYTHONPATH
 step 8 "Updating Product Database with Metadata"
-run_in_dir "backend/services/product_service" "flyctl ssh console -a product-service -C 'cd /app && python images_upload/update_image_metadata.py images_upload/image_metadata.json'" "Updating product database with bike and image data" true
+run_in_dir "backend/services/product_service" "flyctl ssh console -a product-service -C 'sh -c \"cd /app && PYTHONPATH=/app python /app/images_upload/update_image_metadata.py /app/images_upload/image_metadata.json\"'" "Updating product database with bike and image data" true
 
 echo ""
 if [ $GLOBAL_ERROR -eq 0 ]; then

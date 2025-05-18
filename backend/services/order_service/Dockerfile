@@ -3,7 +3,7 @@ FROM python:3.10-slim-buster
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
-    libmariadb-dev \
+    sqlite3 \
     git \
     && rm -rf /var/lib/apt/lists/*
 
@@ -14,11 +14,15 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy shared database directory and models
+# COPY ../../../database /app/database
+COPY ./database_local /app/database
+
 # Copy application code
 COPY . .
 
-# Copy shared database code (assuming this repository structure)
-COPY ../../../backend/shared_database /app/backend/shared_database
+# Create directory for SQLite database
+RUN mkdir -p /data && chmod 777 /data
 
 # Expose port
 EXPOSE 8002

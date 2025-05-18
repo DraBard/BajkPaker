@@ -3,16 +3,13 @@
 # Remove all components from fly.io
 # Author: BajkPaker
 
-# Don't exit immediately on error
-set +e
+# Exit on error
+set -e
 
 # Store the project root directory
 SCRIPT_DIR=$(dirname "$0")
 PROJECT_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
-echo "🚀 Starting removal from project root: $PROJECT_ROOT"
-
-# Change to project root to ensure relative paths work as expected
-cd "$PROJECT_ROOT" || exit 1
+echo "🧹 Starting removal from project root: $PROJECT_ROOT"
 
 # Function to display step information
 step() {
@@ -22,74 +19,57 @@ step() {
   echo "========================================"
 }
 
-# Function to check if a Fly.io app exists
-app_exists() {
+# Function to check if a Fly app exists
+check_app_exists() {
   local app_name=$1
-  flyctl apps list | grep -q "$app_name"
+  flyctl status -a "$app_name" &>/dev/null
   return $?
 }
 
-# Function to run a command in a specific directory
-run_in_dir() {
-  local dir=$1
-  local command=$2
-  local description=$3
+# Function to remove a Fly app
+remove_app() {
+  local app_name=$1
+  local description=$2
   
-  echo "📂 Changing to directory: $dir"
-  cd "$dir" || {
-    echo "❌ Failed to change to directory: $dir"
-    return 1
-  }
-  echo "🔧 Running: $command"
+  echo "🗑️ Removing app: $app_name"
   echo "💻 $description"
-  eval "$command"
-  local result=$?
-  cd "$PROJECT_ROOT"
-  return $result
+  
+  if check_app_exists "$app_name"; then
+    # Remove all volumes first
+    echo "📦 Checking for volumes to remove..."
+    flyctl volumes list -a "$app_name" 2>/dev/null | grep -v "No volumes found" | awk 'NR>1 {print $1}' | while read -r volume; do
+      if [ -n "$volume" ]; then
+        echo "🗑️ Removing volume: $volume from $app_name"
+        flyctl volumes delete "$volume" -a "$app_name" -y
+      fi
+    done
+    
+    # Now remove the app
+    flyctl apps destroy "$app_name" --yes
+    echo "✅ App $app_name removed successfully!"
+  else
+    echo "ℹ️ App $app_name does not exist, nothing to remove."
+  fi
 }
 
-# Function to remove a Fly.io app with error handling
-remove_app() {
-  local dir=$1
-  local app_name=$2
-  local description=$3
-  
-  echo "📂 Changing to directory: $dir"
-  cd "$dir" || {
-    echo "❌ Failed to change to directory: $dir"
-    return 1
-  }
-  
-  echo "🔍 Checking if app '$app_name' exists..."
-  if app_exists "$app_name"; then
-    echo "✅ App '$app_name' found, proceeding with removal"
-    echo "🔧 Running: flyctl apps destroy $app_name --yes"
-    echo "💻 $description"
-    flyctl apps destroy "$app_name" --yes
-    local result=$?
-    if [ $result -eq 0 ]; then
-      echo "✅ Successfully removed $app_name"
-    else
-      echo "❌ Failed to remove $app_name (error code: $result)"
-    fi
-  else
-    echo "ℹ️ App '$app_name' not found on Fly.io, skipping removal"
-  fi
-  
-  cd "$PROJECT_ROOT"
-}
+# Remove each component one by one
+# Start with services and finish with the frontend
 
 # Remove Product Service
 step 1 "Removing Product Service"
-remove_app "backend/services/product_service" "product-service" "Removing product service from Fly.io"
+remove_app "product-service" "Removing product microservice"
 
-# Remove Database
-step 2 "Removing Database"
-remove_app "backend/database" "bajkpaker-mysql" "Removing MySQL database from Fly.io"
+# Remove User Service
+step 2 "Removing User Service"
+remove_app "user-service" "Removing user microservice"
+
+# Remove Order Service
+step 3 "Removing Order Service"
+remove_app "order-service" "Removing order microservice"
 
 # Remove Frontend
-step 3 "Removing Frontend"
-remove_app "frontend" "bajkpaker" "Removing frontend application from Fly.io"
+step 4 "Removing Frontend"
+remove_app "bajkpaker" "Removing frontend application"
 
-echo ""
-echo "✅ Removal process completed!"
+echo "✅ All components have been removed from Fly.io!"
+echo "🎯 Deployment cleanup complete."

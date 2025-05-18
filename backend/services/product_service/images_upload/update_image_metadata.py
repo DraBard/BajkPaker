@@ -1,7 +1,6 @@
 import asyncio
 import os
 import sys
-import socket
 import time
 from pathlib import Path
 import json
@@ -21,62 +20,29 @@ sys.path.append(str(project_root))
 from database.models import Bike, BikeImage
 
 # Database connection parameters
-DB_USER = os.getenv("DB_USER", "bajkpaker")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-# For local development localhost is obvious
-# For production when uploading the images proxying is done localhost is tunneled to bajkpaker-mysql.internal
-# Therefore there is no no need to change the host
-DB_HOST = "127.0.0.1"
-DB_PORT = os.getenv("DB_PORT", "3306")
-DB_NAME = os.getenv("DB_NAME", "bajkpaker_dev")
+# Use SQLite for local development and deployment
+# On Fly.io, use /data directory for persistent storage
+IS_PRODUCTION = os.getenv("ENVIRONMENT", "development") == "production"
+DATA_DIR = "/data" if IS_PRODUCTION else "."
 
-print(f"Using database: mysql+asyncmy://{DB_USER}:****@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+# Create data directory if it doesn't exist (for local development)
+if not IS_PRODUCTION and not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
 
-print("\n⚠️  IMPORTANT CONNECTION NOTICE ⚠️")
-print("This script requires an active flyctl proxy tunnel.")
-print("If you haven't started one yet, please run:")
-print("   flyctl proxy 3306 -a bajkpaker-mysql")
-print("in a separate terminal window.\n")
+# SQLite doesn't need credentials
+DB_NAME = os.getenv("DB_NAME", "bajkpaker_dev.db")
+DB_PATH = os.path.join(DATA_DIR, DB_NAME)
 
+print(f"Using database: sqlite+aiosqlite:///{DB_PATH}")
 
-# Check if the port is reachable before proceeding
-def check_port(host, port, timeout=5):
-    print(f"Testing connection to {host}:{port} (timeout: {timeout}s)...")
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(timeout)
-        result = sock.connect_ex((host, int(port)))
-        if result == 0:
-            print(f"✅ Connection to {host}:{port} successful!")
-            sock.close()
-            return True
-        else:
-            print(f"❌ Connection to {host}:{port} failed (error code: {result})")
-            return False
-    except Exception as e:
-        print(f"❌ Error testing connection: {e}")
-        return False
-    finally:
-        sock.close()
+# Build the database URL for SQLite
+DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"
 
-
-# Test connection before proceeding
-if not check_port(DB_HOST, DB_PORT):
-    print("\n🚨 Cannot connect to MySQL server! 🚨")
-    print("Please start a fly.io proxy tunnel first:")
-    print(f"   flyctl proxy {DB_PORT} -a bajkpaker-mysql")
-    sys.exit(1)
-
-# Build the database URL
-DATABASE_URL = f"mysql+asyncmy://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
-# Create engine with optimized settings
+# Create engine with settings for SQLite
 engine = create_async_engine(
     DATABASE_URL,
     echo=True,
-    pool_recycle=60,  # Recycle connections more frequently
-    pool_timeout=10,  # Shorter timeout
-    pool_pre_ping=True,  # Check connection before use
+    connect_args={"check_same_thread": False}  # Required for SQLite
 )
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
@@ -84,14 +50,14 @@ AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=F
 async def verify_database_tables(session):
     """Verify that required database tables exist"""
     try:
-        # Check if bikes table exists
-        result = await session.execute(text("SHOW TABLES LIKE 'bikes'"))
+        # Check if bikes table exists by querying the SQLite master table
+        result = await session.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name='bikes'"))
         if result.scalar() is None:
             print("❌ Error: bikes table does not exist in the database")
             return False
 
         # Check if bike_images table exists
-        result = await session.execute(text("SHOW TABLES LIKE 'bike_images'"))
+        result = await session.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name='bike_images'"))
         if result.scalar() is None:
             print("❌ Error: bike_images table does not exist in the database")
             return False

@@ -1,15 +1,26 @@
-# fly.toml app configuration file generated for order-service on 2025-03-01T21:12:04+01:00
+# fly.toml app configuration file generated for order-service-long-fire-9199 on 2025-05-16T21:54:59+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'order-service'
+app = 'order-service-long-fire-9199'
 primary_region = 'waw'
 
 [build]
+  dockerfile = 'Dockerfile'
+
+[env]
+  DB_ECHO = 'False'
+  DB_NAME = 'bajkpaker_dev.db'
+  ENVIRONMENT = 'production'
+  LOG_LEVEL = 'info'
+
+[[mounts]]
+  source = 'sqlite_data'
+  destination = '/data'
 
 [http_service]
-  internal_port = 8002
+  internal_port = 8000
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
@@ -17,4 +28,6 @@ primary_region = 'waw'
   processes = ['app']
 
 [[vm]]
-  size = 'shared-cpu-1x'
+  memory = '512mb'
+  cpu_kind = 'shared'
+  cpus = 1

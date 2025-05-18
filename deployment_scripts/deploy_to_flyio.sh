@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Deploy all components to fly.io
+# Deploy all components to fly.io with SQLite instead of MySQL
 # Author: BajkPaker
 
 # Exit on error - we'll handle errors ourselves
@@ -9,7 +9,7 @@ set +e
 # Store the project root directory
 SCRIPT_DIR=$(dirname "$0")
 PROJECT_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
-echo "🚀 Starting removal from project root: $PROJECT_ROOT"
+echo "🚀 Starting deployment from project root: $PROJECT_ROOT"
 
 # Change to project root to ensure relative paths work as expected
 cd "$PROJECT_ROOT" || exit 1
@@ -165,6 +165,38 @@ verify_app() {
   return 1
 }
 
+# Function to prepare service for deployment
+prepare_service_for_deployment() {
+  local service_dir=$1
+  
+  echo "📦 Preparing $service_dir for deployment..."
+  
+  # Create local copy of database directory
+  echo "📂 Creating local copy of database directory..."
+  mkdir -p "$PROJECT_ROOT/$service_dir/database_local"
+  cp -r "$PROJECT_ROOT/backend/database/"* "$PROJECT_ROOT/$service_dir/database_local/"
+  
+  echo "✅ Service $service_dir prepared for deployment!"
+  return 0
+}
+
+# Function to create volume for SQLite database
+create_sqlite_volume() {
+  local app_name=$1
+  
+  echo "📦 Creating SQLite volume for $app_name"
+  
+  flyctl volumes list -a "$app_name" | grep -q "sqlite_data" || flyctl volumes create sqlite_data --size 1 --region waw -a "$app_name" --yes
+  
+  if [ $? -eq 0 ]; then
+    echo "✅ SQLite volume created or already exists!"
+    return 0
+  else
+    echo "❌ Failed to create SQLite volume."
+    return 1
+  fi
+}
+
 # Deploy Frontend
 step 1 "Deploying Frontend"
 if check_app_exists "bajkpaker"; then
@@ -178,34 +210,93 @@ else
   verify_app "bajkpaker" 3 20
 fi
 
-# Deploy Database
-step 2 "Deploying Database"
-if check_app_exists "bajkpaker-mysql"; then
-  echo "🔍 Database app 'bajkpaker-mysql' already exists."
-  echo "🔄 Deploying new version..."
-  run_in_dir "backend/database" "flyctl deploy --yes --now" "Deploying MySQL database" true
-else
-  echo "🆕 Creating new database app..."
-  launch_fly_app "backend/database" "Launching MySQL database" "bajkpaker-mysql"
-fi
+# Initialize SQLite database script
+step 2 "Preparing services to use SQLite"
+echo "🔧 Adding aiosqlite to requirements files..."
 
-# Deploy Product Service
-step 3 "Deploying Product Service"
+# Update requirements files to include SQLite driver
+for service_dir in backend/services/*/; do
+  if [ -f "$service_dir/requirements.txt" ]; then
+    echo "Updating $service_dir/requirements.txt"
+    if ! grep -q "aiosqlite" "$service_dir/requirements.txt"; then
+      echo "aiosqlite==0.19.0" >> "$service_dir/requirements.txt"
+    fi
+  fi
+done
+
+# Deploy Product Service with SQLite
+step 3 "Deploying Product Service with SQLite"
 if check_app_exists "product-service"; then
   echo "🔍 Product service app 'product-service' already exists."
+  
+  # Create SQLite volume if it doesn't exist
+  create_sqlite_volume "product-service"
+  
+  # Prepare service for deployment
+  prepare_service_for_deployment "backend/services/product_service"
+  
   echo "🔄 Deploying new version..."
-  run_in_dir "backend/services/product_service" "flyctl deploy --yes --now" "Deploying product service" true
+  run_in_dir "backend/services/product_service" "flyctl deploy --yes --now" "Deploying product service with SQLite" true
   verify_app "product-service" 3 20
 else
   echo "🆕 Creating new product service app..."
+  
+  # Prepare service for deployment
+  prepare_service_for_deployment "backend/services/product_service"
+  
   launch_fly_app "backend/services/product_service" "Launching product service" "product-service"
+  
+  # Create SQLite volume after app is launched
+  create_sqlite_volume "product-service"
+  
+  # Deploy again to use the volume
+  run_in_dir "backend/services/product_service" "flyctl deploy --yes --now" "Deploying product service with SQLite volume" true
   verify_app "product-service" 3 20
 fi
 
-# Make sure the volume exists for the product service
-step 4 "Checking and Creating Volume"
+# Make sure the volume exists for the product service images
+step 4 "Setting Up Image Volume"
 if check_app_exists "product-service"; then
   run_in_dir "backend/services/product_service" "flyctl volumes list | grep -q 'product_images' || flyctl volumes create product_images --size 1 --region waw --yes" "Ensuring product_images volume exists" true
+
+  # Initialize database for Product Service
+  step 8 "Initializing SQLite Database for Product Service"
+  echo "📝 Executing database initialization for product service..."
+
+  # Use flyctl ssh console to run the database initialization for product service only
+  for service in "product-service"; do
+    if check_app_exists "$service"; then
+      echo "🔧 Initializing database for $service..."
+      flyctl ssh console -a "$service" -C "python -c \"
+import sys, os, sqlite3
+from pathlib import Path
+
+DATA_DIR = '/data'
+DB_PATH = os.path.join(DATA_DIR, 'bajkpaker_dev.db')
+
+# Read schema file
+schema_path = './database/init-scripts/01-schema.sql'
+if not os.path.exists(schema_path):
+    print('Schema file not found')
+    sys.exit(1)
+
+with open(schema_path, 'r') as f:
+    schema_sql = f.read()
+
+# Create database
+conn = sqlite3.connect(DB_PATH)
+try:
+    conn.executescript(schema_sql)
+    conn.commit()
+    print('Database initialized successfully!')
+except Exception as e:
+    print(f'Error: {e}')
+    conn.rollback()
+finally:
+    conn.close()
+\""
+    fi
+  done
 
   # Upload images to product service volume
   step 5 "Uploading Images"
@@ -220,47 +311,67 @@ else
   GLOBAL_ERROR=1
 fi
 
-# Start database proxy in a separate terminal
-step 6 "Database Proxy Instructions"
-echo "📡 Database proxy needs to be run in a separate terminal."
-echo ""
-echo "⚠️ IMPORTANT: Please run the following command in a separate terminal:"
-echo "    flyctl proxy 3306 -a bajkpaker-mysql"
-echo "and asure there is no local docker mysql instance running on port 3306."
-echo ""
-echo "🔍 This will forward the remote MySQL database port to your local machine."
-echo "⏱️ After starting the proxy, return to this terminal and press Enter to continue..."
-
-# Wait for user confirmation
-read -p "Press Enter after starting the database proxy in a separate terminal... " 
-
-# Check if the database proxy port is accessible
-if nc -z -w 5 localhost 3306 2>/dev/null; then
-  echo "✅ Database proxy connection detected on port 3306."
+# Deploy User Service with SQLite
+step 6 "Deploying User Service with SQLite"
+if check_app_exists "user-service"; then
+  echo "🔍 User service app 'user-service' already exists."
   
-  # Update database with image metadata
-  step 7 "Updating Database"
-  run_in_dir "backend/services/product_service/images_upload" "python update_image_metadata.py image_metadata.json" "Updating database with bike and image data" true
+  # Create SQLite volume if it doesn't exist
+  create_sqlite_volume "user-service"
+  
+  echo "🔄 Deploying new version..."
+  run_in_dir "backend/services/user_service" "flyctl deploy --yes --now" "Deploying user service with SQLite" true
+  verify_app "user-service" 3 20
 else
-  echo "❌ Unable to connect to database on port 3306. Please verify:"
-  echo "  1. You've started the proxy in another terminal"
-  echo "  2. The command executed successfully"
-  echo "  3. The database app 'bajkpaker-mysql' exists"
-  GLOBAL_ERROR=1
+  echo "🆕 Creating new user service app..."
+  # Prepare service for deployment
+  prepare_service_for_deployment "backend/services/user_service"
+  
+  launch_fly_app "backend/services/user_service" "Launching user service" "user-service"
+  
+  # Create SQLite volume after app is launched
+  create_sqlite_volume "user-service"
+  
+  # Deploy again to use the volume
+  run_in_dir "backend/services/user_service" "flyctl deploy --yes --now" "Deploying user service with SQLite volume" true
+  verify_app "user-service" 3 20
 fi
 
-echo ""
-echo "⚠️ REMINDER: Don't forget to close the proxy terminal when you're finished."
+# Deploy Order Service with SQLite
+step 7 "Deploying Order Service with SQLite"
+if check_app_exists "order-service"; then
+  echo "🔍 Order service app 'order-service' already exists."
+  
+  # Create SQLite volume if it doesn't exist
+  create_sqlite_volume "order-service"
+  
+  echo "🔄 Deploying new version..."
+  run_in_dir "backend/services/order_service" "flyctl deploy --yes --now" "Deploying order service with SQLite" true
+  verify_app "order-service" 3 20
+else
+  echo "🆕 Creating new order service app..."
+  # Prepare service for deployment
+  prepare_service_for_deployment "backend/services/order_service"
+  
+  launch_fly_app "backend/services/order_service" "Launching order service" "order-service"
+  
+  # Create SQLite volume after app is launched
+  create_sqlite_volume "order-service"
+  
+  # Deploy again to use the volume
+  run_in_dir "backend/services/order_service" "flyctl deploy --yes --now" "Deploying order service with SQLite volume" true
+  verify_app "order-service" 3 20
+fi
 
-echo ""
+# Final check
 if [ $GLOBAL_ERROR -eq 0 ]; then
-  echo "✅ Deployment completed successfully!"
-  echo "🌐 Your application should now be accessible at: https://bajkpaker.fly.dev"
-  echo "🔄 Product service should be running at: https://product-service.fly.dev"
+  echo ""
+  echo "🎉 Deployment completed successfully!"
+  echo "Frontend: https://bajkpaker.fly.dev"
+  echo "Product Service: https://product-service.fly.dev"
+  echo "User Service: https://user-service.fly.dev"
+  echo "Order Service: https://order-service.fly.dev"
 else
+  echo ""
   echo "⚠️ Deployment completed with some errors. Please check the logs above."
-  echo "You may still want to manually verify the deployments:"
-  echo "🌐 Frontend: https://bajkpaker.fly.dev"
-  echo "🔄 Product service: https://product-service.fly.dev"
-fi
-echo "" 
+fi 

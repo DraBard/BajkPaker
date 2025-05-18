@@ -4,33 +4,34 @@ import os
 from typing import AsyncGenerator
 import time
 import logging
+import pathlib
 
 logger = logging.getLogger(__name__)
 
-# In production, these variables will come from Fly.io secrets/env
-DB_USER = os.getenv("DB_USER", "bajkpaker")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "your_password")
-DB_HOST = os.getenv("DB_HOST", "bajkpaker-mysql.internal")
-DB_PORT = os.getenv("DB_PORT", "3306")
-DB_NAME = os.getenv("DB_NAME", "bajkpaker_dev")
+# Use SQLite for local development and deployment
+# On Fly.io, use /data directory for persistent storage
+IS_PRODUCTION = os.getenv("ENVIRONMENT", "development") == "production"
+DATA_DIR = "/data" if IS_PRODUCTION else "."
+
+# Create data directory if it doesn't exist (for local development)
+if not IS_PRODUCTION and not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
+
+# SQLite doesn't need credentials
+DB_NAME = os.getenv("DB_NAME", "bajkpaker_dev.db")
 DB_ECHO = os.getenv("DB_ECHO", "False").lower() == "true"
 
-# Build the database URL dynamically
-DATABASE_URL = f"mysql+asyncmy://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+# SQLite path - store in /data on Fly.io for persistence
+DB_PATH = os.path.join(DATA_DIR, DB_NAME)
 
-# Create async engine with extremely optimized settings for very low memory
+# Build the database URL for SQLite with aiosqlite driver
+DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"
+
+# Create async engine with settings for SQLite
 engine = create_async_engine(
     DATABASE_URL,
     echo=DB_ECHO,
-    pool_pre_ping=True,
-    pool_recycle=30,  # Recycle connections more frequently
-    pool_size=1,  # Absolute minimum pool size
-    max_overflow=1,  # Minimum overflow connections
-    pool_timeout=20,  # Shorter timeout
-    connect_args={
-        "connect_timeout": 10,  # MySQL connection timeout in seconds
-        "client_flag": 0,  # Disable unnecessary client flags
-    },
+    connect_args={"check_same_thread": False},  # Required for SQLite
 )
 
 # Create async session factory

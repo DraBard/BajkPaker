@@ -1,7 +1,7 @@
 fastapi
 uvicorn
 sqlalchemy
-asyncmy
 sqlalchemy[asyncio]
 pydantic
 stripe
+aiosqlite==0.19.0

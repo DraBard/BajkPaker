@@ -22,6 +22,7 @@ sys.path.append(str(backend_dir))
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 from routers import router as product_router
 
 # Ensure proper MIME types are registered for images
@@ -34,27 +35,43 @@ app = FastAPI(
 )  # Disable docs in production
 
 # Get allowed origins from env or use default values
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "https://bajkpaker.fly.dev").split(",")
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "https://bajkpaker.fly.dev,http://localhost:3000").split(",")
 
 logger.info(f"Allowed origins: {allowed_origins}")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=["*"],  # Allow all origins to fix the issue
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=86400,  # Cache preflight requests for 24 hours
 )
 
 
-# Add middleware to log request/response info for debugging
+# Add CORS headers to all responses
 @app.middleware("http")
-async def log_requests(request: Request, call_next):
+async def add_cors_headers(request: Request, call_next):
     logger.info(f"Request path: {request.url.path}")
     logger.info(f"Request headers: {request.headers}")
-
+    
+    # Handle OPTIONS preflight requests manually
+    if request.method == "OPTIONS":
+        response = Response()
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Max-Age"] = "86400"
+        return response
+    
     response = await call_next(request)
-
+    
+    # Add CORS headers to all responses
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
     logger.info(f"Response status code: {response.status_code}")
     logger.info(f"Response headers: {response.headers}")
 
@@ -71,8 +88,8 @@ async def test_image():
     return {"sample_image_url": "/static/images/PortoMain.jpg"}
 
 
-# Mount the static directory with explicit HTML mode disabled to ensure proper content types
-app.mount("/static", StaticFiles(directory="static", html=False), name="static")
+# Mount the images directory as a static files endpoint
+app.mount("/static/images", StaticFiles(directory="images", html=False), name="images")
 
 app.include_router(product_router)
 
@@ -104,7 +121,7 @@ if __name__ == "__main__":
     uvicorn.run(
         app,
         host="0.0.0.0",
-        port=8001,
+        port=8000,
         log_level="info",
         proxy_headers=True,  # Important for handling proxy headers correctly
         forwarded_allow_ips="*",  # Allow all forwarded IPs in production

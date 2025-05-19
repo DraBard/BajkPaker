@@ -54,18 +54,6 @@
             }
         },
         {
-            "name": "SQLite Database Setup",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/backend/database/init_sqlite_db.py",
-            "args": [
-                "--db-path", "${workspaceFolder}/backend/services/product_service/product_service.db"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": false,
-            "cwd": "${workspaceFolder}/backend/database"
-        },
-        {
             "name": "Update Image Metadata",
             "type": "debugpy",
             "request": "launch",
@@ -83,10 +71,9 @@
         {
             "name": "Run All Services",
             "configurations": [
-                "SQLite Database Setup",
                 "Update Image Metadata",
                 "Product Service",
-                // "Order Service", 
+                "Order Service", 
                 // "User Service",
                 "Frontend"
             ],

@@ -19,11 +19,12 @@ from dotenv import load_dotenv
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+
 # Updated CORS configuration function
 def configure_cors(app):
     # Get environment - development or production
     env = os.environ.get("ENV", "development")
-    
+
     # Define allowed origins based on environment
     if env == "development":
         # In development, allow localhost origins with different ports
@@ -42,7 +43,7 @@ def configure_cors(app):
             "https://bajkpaker.fly.dev",
             # Add other production domains as needed
         ]
-    
+
     # Configure the CORS middleware with more comprehensive settings
     app.add_middleware(
         CORSMiddleware,
@@ -52,7 +53,7 @@ def configure_cors(app):
         allow_headers=["*"],  # Allow all headers for development simplicity
         max_age=86400,  # Cache preflight requests for 24 hours
     )
-    
+
     logger.info(f"CORS configured with origins: {origins}")
 
 
@@ -97,15 +98,19 @@ async def add_to_cart(
 
     session_id = get_session_id(request, response)
     logger.info(f"Session ID for cart operation: {session_id}")
-    
+
     # Fetch bike from product service to ensure it exists and get current data
-    logger.info(f"Fetching bike data for bike_id: {cart_item.bike_id} from product service.")
+    logger.info(
+        f"Fetching bike data for bike_id: {cart_item.bike_id} from product service."
+    )
     bike_data = await product_client.get_bike(cart_item.bike_id)
     if not bike_data:
-        logger.error(f"Bike not found in product service for bike_id: {cart_item.bike_id}")
+        logger.error(
+            f"Bike not found in product service for bike_id: {cart_item.bike_id}"
+        )
         raise HTTPException(status_code=404, detail="Bike not found in product service")
     logger.info(f"Successfully fetched bike data: {bike_data}")
-    
+
     # Check if already in cart
     existing = await db.execute(
         select(CartItem).where(
@@ -113,9 +118,11 @@ async def add_to_cart(
         )
     )
     if existing.scalar_one_or_none():
-        logger.warning(f"Item {cart_item.bike_id} already in cart for session {session_id}")
+        logger.warning(
+            f"Item {cart_item.bike_id} already in cart for session {session_id}"
+        )
         raise HTTPException(status_code=400, detail="This item is already in the cart")
-        
+
     # Check if bike exists in our local database
     logger.info(f"Checking local database for bike_id: {cart_item.bike_id}")
     bike = await db.get(Bike, cart_item.bike_id)
@@ -127,7 +134,7 @@ async def add_to_cart(
             name=bike_data["name"],
             price=bike_data["price"],
             description=bike_data.get("description"),
-            bought=bike_data.get("bought", False)
+            bought=bike_data.get("bought", False),
         )
         db.add(bike)
         logger.info(f"Created local copy of bike {bike_data['id']}")
@@ -141,11 +148,11 @@ async def add_to_cart(
         logger.info(f"Updated local copy of bike {bike_data['id']}")
 
     # Create cart item
-    logger.info(f"Creating cart item for bike_id: {cart_item.bike_id}, quantity: {cart_item.quantity}, session_id: {session_id}")
+    logger.info(
+        f"Creating cart item for bike_id: {cart_item.bike_id}, quantity: {cart_item.quantity}, session_id: {session_id}"
+    )
     new_item = CartItem(
-        bike_id=cart_item.bike_id, 
-        quantity=cart_item.quantity, 
-        session_id=session_id
+        bike_id=cart_item.bike_id, quantity=cart_item.quantity, session_id=session_id
     )
     db.add(new_item)
     await db.commit()
@@ -175,19 +182,21 @@ async def remove_from_cart(
     await db.commit()
     return {"message": "Item removed from cart"}
 
+
 load_dotenv()
-BREVO_API_KEY         = os.getenv("BREVO_API_KEY")
-BREVO_SENDER_EMAIL    = os.getenv("BREVO_SENDER_EMAIL")
-BREVO_SENDER_NAME     = os.getenv("BREVO_SENDER_NAME", "BajkPaker")
-NOTIFICATION_EMAIL    = "bajkpaker@gmail.com"
+BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+BREVO_SENDER_EMAIL = os.getenv("BREVO_SENDER_EMAIL")
+BREVO_SENDER_NAME = os.getenv("BREVO_SENDER_NAME", "BajkPaker")
+NOTIFICATION_EMAIL = "bajkpaker@gmail.com"
+
 
 def send_order_notification(order, customer):
     """Send notification emails via Brevo (Sendinblue): one to internal address, one to client."""
     configuration = sib_api_v3_sdk.Configuration()
-    configuration.api_key['api-key'] = BREVO_API_KEY
+    configuration.api_key["api-key"] = BREVO_API_KEY
     api_client = sib_api_v3_sdk.ApiClient(configuration)
     api_instance = transactional_emails_api.TransactionalEmailsApi(api_client)
-    
+
     internal_email = SendSmtpEmail(
         sender={"name": BREVO_SENDER_NAME, "email": BREVO_SENDER_EMAIL},
         to=[{"email": NOTIFICATION_EMAIL}],
@@ -199,25 +208,25 @@ def send_order_notification(order, customer):
             f"<p>Imię i nazwisko: {customer['name']}<br>"
             f"Email: {customer['email']}<br>"
             f"Telefon: {customer['phone']}</p>"
-        )
+        ),
     )
     try:
         response = api_instance.send_transac_email(internal_email)
         logger.info("Brevo internal email sent, id: %s", response.message_id)
     except Exception as e:
         logger.error("Failed to send internal email via Brevo: %s", e)
-    
+
     # send confirmation to client
     client_email = SendSmtpEmail(
         sender={"name": BREVO_SENDER_NAME, "email": BREVO_SENDER_EMAIL},
-        to=[{"email": customer['email']}],
+        to=[{"email": customer["email"]}],
         subject=f"Twoje zamówienie #{order.id} zostało zarejestrowane",
         html_content=(
             f"<h3>Dziękujemy za złożenie zamówienia #{order.id}</h3>"
             f"<p>Twoje zamówienie zostało pomyślnie zarejestrowane. </p>"
             f"<p>Wartość zamówienia: {order.total_price} PLN</p>"
             f"<p>Skontaktujemy się z Tobą wkrótce w celu potwierdzenia szczegółów.</p>"
-        )
+        ),
     )
     try:
         response2 = api_instance.send_transac_email(client_email)
@@ -229,20 +238,20 @@ def send_order_notification(order, customer):
 
 @router.post("/api/orders")
 async def create_order(
-    order: OrderCreate, 
-    request: Request, 
-    response: Response, 
+    order: OrderCreate,
+    request: Request,
+    response: Response,
     db: AsyncSession = Depends(get_db),
     product_client: ProductServiceClient = Depends(get_product_client),
 ):
     """Create a new order and send notification email"""
     session_id = get_session_id(request, response)
-    
+
     logger.info("Creating order with total_price: %s", order.total_price)
     new_order = Order(
-        total_price=order.total_price, 
+        total_price=order.total_price,
         status=OrderStatus.PENDING,
-        customer_info=order.customer.dict()  # Store customer info
+        customer_info=order.customer.dict(),  # Store customer info
     )
     db.add(new_order)
     await db.commit()
@@ -256,8 +265,10 @@ async def create_order(
             logger.error(f"Bike {item.bike_id} not found in product service")
             await db.delete(new_order)
             await db.commit()
-            raise HTTPException(status_code=404, detail=f"Bike {item.bike_id} not found")
-        
+            raise HTTPException(
+                status_code=404, detail=f"Bike {item.bike_id} not found"
+            )
+
         # Get or create local bike record
         bike = await db.get(Bike, item.bike_id)
         if not bike:
@@ -266,44 +277,39 @@ async def create_order(
                 name=bike_data["name"],
                 price=bike_data["price"],
                 description=bike_data.get("description"),
-                bought=bike_data.get("bought", False)  # Use existing value, don't set to True
+                bought=bike_data.get(
+                    "bought", False
+                ),  # Use existing value, don't set to True
             )
             db.add(bike)
-        
+
         # Create order item
         new_order_item = OrderItem(
-            order_id=new_order.id, 
-            bike_id=item.bike_id, 
-            quantity=item.quantity
+            order_id=new_order.id, bike_id=item.bike_id, quantity=item.quantity
         )
         db.add(new_order_item)
-    
+
     # Remove items from cart after successful order
-    await db.execute(
-        select(CartItem).where(CartItem.session_id == session_id)
-    )
+    await db.execute(select(CartItem).where(CartItem.session_id == session_id))
     cart_items = await db.execute(
         select(CartItem).where(CartItem.session_id == session_id)
     )
     for item in cart_items.scalars().all():
         await db.delete(item)
-    
+
     await db.commit()
 
     # use Brevo to notify
     send_order_notification(new_order, order.customer.dict())
 
     return {
-      "order_id": new_order.id,
-      "message": "Order created successfully. Payment on delivery only."
+        "order_id": new_order.id,
+        "message": "Order created successfully. Payment on delivery only.",
     }
 
 
 @router.get("/api/orders/{order_id}", response_model=OrderOut)
-async def get_order(
-    order_id: int,
-    db: AsyncSession = Depends(get_db)
-):
+async def get_order(order_id: int, db: AsyncSession = Depends(get_db)):
     """Get details of a specific order"""
     result = await db.execute(
         select(Order)

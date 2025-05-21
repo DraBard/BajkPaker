@@ -4,33 +4,31 @@ import os
 from typing import AsyncGenerator
 import time
 import logging
+import pathlib
 
 logger = logging.getLogger(__name__)
 
-# In production, these variables will come from Fly.io secrets/env
-DB_USER = os.getenv("DB_USER", "bajkpaker")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "your_password")
-DB_HOST = os.getenv("DB_HOST", "bajkpaker-mysql.internal")
-DB_PORT = os.getenv("DB_PORT", "3306")
-DB_NAME = os.getenv("DB_NAME", "bajkpaker_dev")
+# Environment variables
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 DB_ECHO = os.getenv("DB_ECHO", "False").lower() == "true"
 
-# Build the database URL dynamically
-DATABASE_URL = f"mysql+asyncmy://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+# SQLite database path configuration
+if ENVIRONMENT == "production":
+    DB_PATH = "/data/order_service.db"
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+else:
+    DB_PATH = os.path.join(
+        pathlib.Path(__file__).parent.absolute(), "order_service.db"
+    )
 
-# Create async engine with extremely optimized settings for very low memory
+# Build the SQLite database URL
+DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"
+
+# Create async engine with optimized settings for very low memory
 engine = create_async_engine(
     DATABASE_URL,
     echo=DB_ECHO,
-    pool_pre_ping=True,
-    pool_recycle=30,  # Recycle connections more frequently
-    pool_size=1,  # Absolute minimum pool size
-    max_overflow=1,  # Minimum overflow connections
-    pool_timeout=20,  # Shorter timeout
-    connect_args={
-        "connect_timeout": 10,  # MySQL connection timeout in seconds
-        "client_flag": 0,  # Disable unnecessary client flags
-    },
+    connect_args={"check_same_thread": False},  # Allow multithreaded access
 )
 
 # Create async session factory
@@ -56,13 +54,11 @@ async def get_db(max_retries=3, retry_delay=1) -> AsyncGenerator[AsyncSession, N
             async with AsyncSessionLocal() as session:
                 try:
                     yield session
-                    await session.commit()
-                    return  # Success, exit the function
+                    # Do not commit or return here; let FastAPI handle session cleanup
                 except Exception as e:
                     await session.rollback()
                     raise e
-                finally:
-                    await session.close()  # Explicitly close to free up resources quickly
+                break  # Exit the retry loop after successful yield
         except Exception as e:
             last_error = e
             retries += 1
@@ -77,3 +73,15 @@ async def get_db(max_retries=3, retry_delay=1) -> AsyncGenerator[AsyncSession, N
                     f"All database connection attempts failed. Last error: {str(e)}"
                 )
                 raise last_error
+
+# Auto-create all tables at import (development only)
+if ENVIRONMENT != "production":
+    import asyncio
+    from models import Base
+
+    async def _init_tables():
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+
+    # Synchronous kick-off of the async table creation
+    asyncio.run(_init_tables())

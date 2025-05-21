@@ -18,11 +18,10 @@ const USER_API_URL = isProduction
 // Set up axios defaults for cookies
 axios.defaults.withCredentials = true;
 
-// Add console logging for debugging in production
-const logRequest = (url) => {
-  if (isProduction) {
-    console.log(`Making API request to: ${url}`);
-  }
+// Enhanced logging function with method and data parameters
+const logRequest = (url, method = 'GET', data = null) => {
+  console.log(`Making API ${method} request to: ${url}`);
+  if (data) console.log('Request data:', data);
 };
 
 export const fetchBikes = async () => {
@@ -54,8 +53,46 @@ export const fetchBike = async (bikeId) => {
 };
 
 export const addToCart = async (cartItem) => {
-  const response = await axios.post(`${ORDER_API_URL}/cart`, cartItem, { withCredentials: true });
-  return response.data;
+  try {
+    const url = `${ORDER_API_URL}/cart`;
+    logRequest(url, 'POST', cartItem);
+    console.log('API sending to cart:', cartItem);
+    console.log('Full URL:', url);
+    
+    // Check server availability before making actual request
+    try {
+      await axios.options(ORDER_API_URL, { timeout: 2000 });
+    } catch (healthError) {
+      console.error('Order service health check failed:', healthError);
+      alert('Order service appears to be unavailable. Please try again later.');
+      throw new Error('Order service unavailable');
+    }
+    
+    const response = await axios.post(url, cartItem, {
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000 // 10 second timeout
+    });
+    
+    console.log('Cart API response status:', response.status);
+    console.log('Cart API response data:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding to cart:', error);
+    if (error.response) {
+      console.error('Error response data:', error.response.data);
+      console.error('Error response status:', error.response.status);
+      console.error('Error response headers:', error.response.headers);
+    } else if (error.request) {
+      console.error('Error request (no response received):', error.request);
+      alert('Unable to reach order service. Please check your connection and try again.');
+    } else {
+      console.error('Error message:', error.message);
+    }
+    throw error;
+  }
 };
 
 export const fetchCart = async () => {

@@ -188,6 +188,10 @@ const BikeDetails = ({
 
     setIsLoading(true);
     try {
+      console.log('Adding bike to cart:', bike);
+      
+      // Pass the entire bike object to CartContext
+      // CartContext will handle extracting the ID and formatting for the API
       await addToCart(bike);
       setAddedToCart(true);
     } catch (error) {

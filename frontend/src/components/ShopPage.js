@@ -86,6 +86,8 @@ const ShopPage = () => {
     return <p>No bikes available for purchase.</p>;
   }
 
+  const DEFAULT_IMAGE_PATH = '/placeholder-bike.jpg';
+  
   const getImageUrl = (imagePath) => {
     // Return default image if no path provided
     if (!imagePath) return DEFAULT_IMAGE_PATH;

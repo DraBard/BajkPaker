@@ -84,7 +84,7 @@ Postanowienia ogólne
 
 Procedura zakupu
 
-    Składanie zamówienia: Kupujący wybiera model roweru i składa zamówienie przez stronę internetową sklepu lub kontaktując się bezpośrednio ze Sprzedawcą (e-mail, telefon). Zamówienie powinno zawierać dane Kupującego, wybrany produkt oraz preferowaną formę płatności i wstępny termin odbioru.
+    Składanie zamówienia: Kupujący wybiera model roweru i składa zamówienie przez stronę internetową sklepu lub kontaktując się bezpośrednio ze Sprzedawcą (e-mail, telefon). Zamówienie powinno zawierać dane Kupującego, wybrany produkt oraz preferowaną formę płatności i wstępny termin odbioru. W przypadku problemów technicznych z formularzem zamówienia, prosimy o bezpośredni kontakt telefoniczny lub mailowy.
 
     Potwierdzenie i zawarcie umowy: Sprzedawca potwierdza przyjęcie zamówienia (telefonicznie lub mailowo) w ciągu kilku dni od jego otrzymania. Po potwierdzeniu dostępności towaru i uzgodnieniu warunków następuje zawarcie umowy sprzedaży. Umowę uważa się za zawartą z chwilą potwierdzenia zamówienia przez Sprzedawcę.
 

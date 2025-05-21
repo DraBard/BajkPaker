@@ -16,6 +16,7 @@ const ContactPage = () => (
     <h1>Kontakt</h1>
     <p>Kontaktujcie się śmiało w razie wątpliwości co do naszych bajków!</p>
     <ContactInfo>
+      <p>bajkpaker@gmail.com</p>
       <p>Telefon: 501 325 559</p>
       <p>ul. Styczyńskiego 10/1</p>
     </ContactInfo>

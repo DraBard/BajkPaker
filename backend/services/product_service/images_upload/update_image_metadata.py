@@ -37,11 +37,13 @@ else:
 
 print(f"Using database: {DB_PATH}")
 
+
 # Add table creation to ensure the required tables exist
 async def create_tables():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     print("✅ Database tables created or already exist.")
+
 
 # Build the database URL
 DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"
@@ -61,7 +63,9 @@ async def verify_database_tables(session):
         # Check if bikes table exists using model's __tablename__ attribute
         table_bikes = Bike.__tablename__
         result = await session.execute(
-            text(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_bikes}'")
+            text(
+                f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_bikes}'"
+            )
         )
         if result.scalar() is None:
             print(f"❌ Error: {table_bikes} table does not exist in the database")
@@ -70,7 +74,9 @@ async def verify_database_tables(session):
         # Check if bike_images table exists using model's __tablename__ attribute
         table_bike_images = BikeImage.__tablename__
         result = await session.execute(
-            text(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_bike_images}'")
+            text(
+                f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_bike_images}'"
+            )
         )
         if result.scalar() is None:
             print(f"❌ Error: {table_bike_images} table does not exist in the database")

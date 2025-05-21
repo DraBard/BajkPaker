@@ -35,7 +35,9 @@ app = FastAPI(
 
 # Get allowed origins from env or use default values
 allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "https://bajkpaker.fly.dev")
-allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
+allowed_origins = [
+    origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()
+]
 
 logger.info(f"Allowed origins for CORS: {allowed_origins}")
 

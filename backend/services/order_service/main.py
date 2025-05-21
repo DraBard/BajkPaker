@@ -1,29 +1,38 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from routers import router as order_router
-import uvicorn
-import os
-from dotenv import load_dotenv
+from fastapi import FastAPI, Request, Response
+import logging
+from routers import router, configure_cors
 
-# Load environment variables
-load_dotenv()
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-app = FastAPI()
+app = FastAPI(title="Order Service")
 
-# Configure CORS middleware
-allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "https://bajkpaker.fly.dev")
-allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
+# Configure CORS
+configure_cors(app)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Include routers
+app.include_router(router)
 
-# Include your routers
-app.include_router(order_router)
+# Add a debugging middleware to log all requests
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.info(f"Request: {request.method} {request.url}")
+    logger.info(f"Request headers: {request.headers}")
+    
+    response = await call_next(request)
+    
+    logger.info(f"Response status: {response.status_code}")
+    return response
+
+@app.get("/healthz")
+async def health_check():
+    return {"status": "healthy"}
+
+# Explicitly handle OPTIONS requests at the root level
+@app.options("/{rest_of_path:path}")
+async def options_handler(request: Request):
+    return Response(status_code=200)
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8002, reload=True)
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8002)

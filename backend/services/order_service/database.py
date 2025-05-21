@@ -78,10 +78,20 @@ async def get_db(max_retries=3, retry_delay=1) -> AsyncGenerator[AsyncSession, N
 if ENVIRONMENT != "production":
     import asyncio
     from models import Base
+    from sqlalchemy import text
 
     async def _init_tables():
         async with engine.begin() as conn:
+            # create missing tables
             await conn.run_sync(Base.metadata.create_all)
+            # add customer_info column if it doesn't exist
+            # check existing columns in orders
+            pragma = await conn.execute(text("PRAGMA table_info('orders')"))
+            cols = [row[1] for row in pragma.fetchall()]
+            if "customer_info" not in cols:
+                await conn.execute(
+                    text("ALTER TABLE orders ADD COLUMN customer_info JSON")
+                )
 
-    # Synchronous kick-off of the async table creation
+    # Synchronous kick-off of the async table creation + migration
     asyncio.run(_init_tables())

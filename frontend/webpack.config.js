@@ -23,22 +23,40 @@ module.exports = {
       directory: path.join(__dirname, 'public'),
     },
     historyApiFallback: true,
-    // Configure proxy only in development
+    // Configure proxy only in development with improved settings
     ...(isDevelopment && {
       proxy: [
         {
           context: ['/api/bikes'],
           target: 'http://localhost:8001',
+          pathRewrite: { '^/api': '' },
+          secure: false,
           changeOrigin: true,
+          onProxyReq: (proxyReq) => {
+            // Log proxy requests for debugging
+            console.log('Proxying request to bikes service:', proxyReq.path);
+          },
+          onError: (err, req, res) => {
+            console.error('Proxy error:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Proxy error', message: err.message }));
+          },
         },
         {
           context: ['/api/cart', '/api/orders', '/api/payments'],
           target: 'http://localhost:8002',
+          pathRewrite: { '^/api': '' },
+          secure: false,
           changeOrigin: true,
+          onProxyReq: (proxyReq) => {
+            console.log('Proxying request to orders service:', proxyReq.path);
+          },
         },
         {
           context: ['/api/users'],
           target: 'http://localhost:8003',
+          pathRewrite: { '^/api': '' },
+          secure: false,
           changeOrigin: true,
         },
       ],

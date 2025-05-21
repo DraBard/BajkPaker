@@ -3,5 +3,8 @@ uvicorn
 sqlalchemy
 asyncmy
 sqlalchemy[asyncio]
-pydantic
-stripe
+pydantic[email]
+httpx
+aiosqlite
+python-dotenv
+sib_api_v3_sdk

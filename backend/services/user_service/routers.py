@@ -1,22 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from pathlib import Path
-import sys
-from schemas import UserCreate, UserOut, UserLogin  # Create these schemas as needed
+from schemas import UserCreate, UserOut, UserLogin
 import logging
 
+from database import get_db
+from models import User
+
 logger = logging.getLogger(__name__)
-
-try:
-    from database import get_db
-    from database.models import User  # Add a “User” model in models.py
-except ImportError:
-    sys.path.append(str(Path(__file__).resolve().parents[2]))
-    from database import get_db
-
-    # from database.models import User
-
 
 router = APIRouter()
 

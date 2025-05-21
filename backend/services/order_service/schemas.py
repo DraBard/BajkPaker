@@ -1,12 +1,21 @@
-from pydantic import BaseModel
-from typing import List
+from pydantic import BaseModel, EmailStr
+from typing import List, Optional
+from enum import Enum
+
+
+class OrderStatus(str, Enum):
+    PENDING = "pending"
+    PAID = "paid"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
 
 
 class BikeOut(BaseModel):
     id: int
     name: str
     price: float
-    description: str
+    description: Optional[str] = None
+    bought: bool = False
 
     class Config:
         orm_mode = True
@@ -32,9 +41,16 @@ class OrderItemCreate(BaseModel):
     quantity: int
 
 
+class CustomerInfo(BaseModel):
+    name: str
+    email: EmailStr
+    phone: str
+
+
 class OrderCreate(BaseModel):
     total_price: float
     items: List[OrderItemCreate]
+    customer: CustomerInfo
 
 
 class OrderItemOut(BaseModel):
@@ -52,6 +68,7 @@ class OrderOut(BaseModel):
     total_price: float
     status: str
     items: List[OrderItemOut]
+    customer: Optional[CustomerInfo]
 
     class Config:
         orm_mode = True

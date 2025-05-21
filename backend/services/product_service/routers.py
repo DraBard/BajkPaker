@@ -2,8 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-import sys
-from pathlib import Path
 from schemas import BikeCreate, BikeOut
 from models import Bike
 from database import get_db

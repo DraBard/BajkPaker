@@ -310,7 +310,7 @@ const CartPage = () => {
 
   return (
     <CartContainer>
-      <h1>Your Cart</h1>
+      <h1>Koszyk</h1>
       
       <InfoMessage>
         Narazie obsługujemy tylko płatności przy odbiorze.
@@ -327,7 +327,7 @@ const CartPage = () => {
       )}
       
       {!error && cart.length === 0 ? (
-        <p>Your cart is empty</p>
+        <p>Twój koszyk jest pusty</p>
       ) : (
         <>
           {cart.map((item) => (

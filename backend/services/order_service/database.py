@@ -17,9 +17,7 @@ if ENVIRONMENT == "production":
     DB_PATH = "/data/order_service.db"
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 else:
-    DB_PATH = os.path.join(
-        pathlib.Path(__file__).parent.absolute(), "order_service.db"
-    )
+    DB_PATH = os.path.join(pathlib.Path(__file__).parent.absolute(), "order_service.db")
 
 # Build the SQLite database URL
 DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"
@@ -73,6 +71,7 @@ async def get_db(max_retries=3, retry_delay=1) -> AsyncGenerator[AsyncSession, N
                     f"All database connection attempts failed. Last error: {str(e)}"
                 )
                 raise last_error
+
 
 # Auto-create all tables at import (development only)
 if ENVIRONMENT != "production":

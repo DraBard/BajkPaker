@@ -16,7 +16,7 @@ load_dotenv()
 if os.getenv("ENVIRONMENT") != "development":
     app_dir = Path("/app")  # In production, files are in /app
 else:
-    app_dir = Path(__file__).resolve().parents[1] # Local development path
+    app_dir = Path(__file__).resolve().parents[1]  # Local development path
 
 sys.path.append(str(app_dir))
 

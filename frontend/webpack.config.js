@@ -51,6 +51,11 @@ module.exports = {
           onProxyReq: (proxyReq) => {
             console.log('Proxying request to orders service:', proxyReq.path);
           },
+          onError: (err, req, res) => {
+            console.error('Proxy error to orders service:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Proxy error', message: err.message }));
+          },
         },
         {
           context: ['/api/users'],
@@ -58,6 +63,9 @@ module.exports = {
           pathRewrite: { '^/api': '' },
           secure: false,
           changeOrigin: true,
+          onProxyReq: (proxyReq) => {
+            console.log('Proxying request to users service:', proxyReq.path);
+          },
         },
       ],
     }),

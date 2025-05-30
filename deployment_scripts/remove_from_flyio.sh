@@ -112,32 +112,22 @@ if app_exists "product-service"; then
   remove_volume "product-service" "product_data"
 fi
 
-# Remove User Service volume
-step 2 "Removing User Service Volume"
-if app_exists "user-service"; then
-  remove_volume "user-service" "user_data"
-fi
-
 # Remove Order Service volume
-step 3 "Removing Order Service Volume"
-if app_exists "order-service"; then
-  remove_volume "order-service" "order_data"
+step 2 "Removing Order Service Volume"
+if app_exists "order-processing-service"; then
+  remove_volume "order-processing-service" "order_data"
 fi
 
 # Remove Product Service
-step 4 "Removing Product Service"
+step 3 "Removing Product Service"
 remove_app "backend/services/product_service" "product-service" "Removing product service from Fly.io"
 
-# Remove User Service
-step 5 "Removing User Service"
-remove_app "backend/services/user_service" "user-service" "Removing user service from Fly.io"
-
 # Remove Order Service
-step 6 "Removing Order Service"
-remove_app "backend/services/order_service" "order-service" "Removing order service from Fly.io"
+step 5 "Removing Order Service"
+remove_app "backend/services/order_processing_service" "order-processing-service" "Removing order service from Fly.io"
 
 # Remove Frontend
-step 7 "Removing Frontend"
+step 6 "Removing Frontend"
 remove_app "frontend" "bajkpaker" "Removing frontend application from Fly.io"
 
 echo ""

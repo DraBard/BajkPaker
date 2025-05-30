@@ -17,11 +17,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Copy shared database code (assuming this repository structure)
-COPY ../../../backend/shared_database /app/backend/shared_database
+# Create data directory for production database
+RUN mkdir -p /data
 
-# Expose port
-EXPOSE 8002
+# Set environment to production
+ENV ENVIRONMENT=production
 
-# Run application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]
+# Initialize database and run application
+CMD ["sh", "-c", "python init_db.py && uvicorn main:app --host 0.0.0.0 --port 8002"]

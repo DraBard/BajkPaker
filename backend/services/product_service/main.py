@@ -33,22 +33,35 @@ app = FastAPI(
     title="Product Service", docs_url=None, redoc_url=None
 )  # Disable docs in production
 
-# Get allowed origins from env or use default values
-allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "https://bajkpaker.fly.dev")
-allowed_origins = [
-    origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()
-]
-
-logger.info(f"Allowed origins for CORS: {allowed_origins}")
-
+# Configure CORS in main
+mode = os.getenv("MODE", "production").lower()
+if mode == "development":
+    origins = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8000",
+        "http://localhost:8001",
+        "http://localhost:8002",
+        "http://localhost:8003",
+    ]
+else:
+    origins = [
+        "https://bajkpaker.fly.dev",
+        "https://order-processing-service.fly.dev",
+    ]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    max_age=86400,
 )
+logger.info(f"CORS configured with origins: {origins}")
 
+@app.head("/", include_in_schema=False)
+async def head_root():
+    return Response(status_code=200)
 
 # Add middleware to log request/response info for debugging
 @app.middleware("http")

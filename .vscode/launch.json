@@ -30,12 +30,12 @@
             "name": "Order Service",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/backend/services/order_service/main.py",
+            "program": "${workspaceFolder}/backend/services/order_processing_service/main.py",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "cwd": "${workspaceFolder}/backend/services/order_service",
+            "cwd": "${workspaceFolder}/backend/services/order_processing_service",
             "env": {
-                "SQLITE_PATH": "${workspaceFolder}/backend/data/order_service.db",
+                "SQLITE_PATH": "${workspaceFolder}/backend/data/order_processing_service.db",
                 "FRONTEND_URL": "http://localhost:8080",
                 "ENVIRONMENT": "development"
             }

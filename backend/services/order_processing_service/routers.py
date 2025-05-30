@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 import os
 import uuid
 import logging
-from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 import sib_api_v3_sdk
 from sib_api_v3_sdk.api import transactional_emails_api
 from sib_api_v3_sdk.models import SendSmtpEmail
@@ -14,47 +14,9 @@ from database import get_db
 from models import Order, OrderItem, CartItem, Bike
 from schemas import OrderCreate, OrderOut, CartItemCreate, CartItemOut, OrderStatus
 from product_client import ProductServiceClient
-from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-
-
-# Updated CORS configuration function
-def configure_cors(app):
-    # Get environment - development or production
-    env = os.environ.get("ENV", "development")
-
-    # Define allowed origins based on environment
-    if env == "development":
-        # In development, allow localhost origins with different ports
-        origins = [
-            "http://localhost:3000",
-            "http://127.0.0.1:3000",
-            "http://localhost:8000",
-            "http://localhost:8001",
-            "http://localhost:8002",
-            "http://localhost:8003",
-            # Add any other development origins as needed
-        ]
-    else:
-        # In production, use specific domains
-        origins = [
-            "https://bajkpaker.fly.dev",
-            # Add other production domains as needed
-        ]
-
-    # Configure the CORS middleware with more comprehensive settings
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins,
-        allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-        allow_headers=["*"],  # Allow all headers for development simplicity
-        max_age=86400,  # Cache preflight requests for 24 hours
-    )
-
-    logger.info(f"CORS configured with origins: {origins}")
 
 
 def get_session_id(request: Request, response: Response) -> str:

@@ -8,7 +8,7 @@ const PRODUCT_API_URL = isProduction
   : 'http://localhost:8001/api';
 
 const ORDER_API_URL = isProduction
-  ? 'https://order-service.fly.dev/api'
+  ? 'https://order-processing-service.fly.dev/api'
   : 'http://localhost:8002/api';
 
 const USER_API_URL = isProduction
@@ -64,8 +64,7 @@ export const addToCart = async (cartItem) => {
       await axios.options(ORDER_API_URL, { timeout: 2000 });
     } catch (healthError) {
       console.error('Order service health check failed:', healthError);
-      alert('Order service appears to be unavailable. Please try again later.');
-      throw new Error('Order service unavailable');
+      throw new Error('Order service appears to be unavailable. Please try again later.');
     }
     
     const response = await axios.post(url, cartItem, {
@@ -73,7 +72,7 @@ export const addToCart = async (cartItem) => {
       headers: {
         'Content-Type': 'application/json'
       },
-      timeout: 10000 // 10 second timeout
+      timeout: 15000 // 15 second timeout (increased from 10)
     });
     
     console.log('Cart API response status:', response.status);
@@ -81,23 +80,74 @@ export const addToCart = async (cartItem) => {
     return response.data;
   } catch (error) {
     console.error('Error adding to cart:', error);
+    
+    // More detailed error logging
     if (error.response) {
       console.error('Error response data:', error.response.data);
       console.error('Error response status:', error.response.status);
       console.error('Error response headers:', error.response.headers);
+      
+      // If the error is due to bike not found in product service, make it clear
+      if (error.response.status === 404 || 
+          (error.response.data && error.response.data.detail && 
+           error.response.data.detail.includes('not found in product service'))) {
+        throw new Error('The requested bike is currently unavailable or out of stock.');
+      }
     } else if (error.request) {
       console.error('Error request (no response received):', error.request);
-      alert('Unable to reach order service. Please check your connection and try again.');
-    } else {
-      console.error('Error message:', error.message);
+      throw new Error('Unable to reach the server. Please check your connection and try again.');
     }
+    
     throw error;
   }
 };
 
 export const fetchCart = async () => {
-  const response = await axios.get(`${ORDER_API_URL}/cart`, { withCredentials: true });
-  return response.data;
+  try {
+    // Create a cancel token with a unique identifier
+    const source = axios.CancelToken.source();
+    
+    // Set a longer timeout to avoid quick retries and reduce spam
+    const timeoutId = setTimeout(() => {
+      source.cancel('Request timeout');
+    }, 15000); // 15-second timeout
+    
+    console.log('Fetching cart data from API...');
+    const response = await axios.get(`${ORDER_API_URL}/cart`, { 
+      withCredentials: true,
+      cancelToken: source.token,
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Accept': 'application/json'
+      },
+      // Add retry count as a query param for debugging
+      params: {
+        _t: new Date().getTime() // Cache busting
+      }
+    });
+    
+    clearTimeout(timeoutId);
+    console.log('Cart fetch successful:', response.data);
+    return response.data;
+  } catch (error) {
+    // Don't throw if request was cancelled - prevents retry loops
+    if (axios.isCancel(error)) {
+      console.log('Request cancelled:', error.message);
+      return [];
+    }
+    
+    // For CORS or network errors, return empty array instead of throwing
+    if (error.message && (error.message.includes('Network') || error.message.includes('CORS'))) {
+      console.error('CORS or Network error fetching cart:', error.message);
+      // Return empty array instead of throwing to prevent retry spam
+      return [];
+    }
+    
+    // Rethrow other errors
+    console.error('Error in fetchCart:', error);
+    throw error;
+  }
 };
 
 export const removeFromCart = async (cartItemId) => {

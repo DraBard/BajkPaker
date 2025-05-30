@@ -45,7 +45,7 @@ flyctl status
 ```bash
 flyctl status -a product-service
 flyctl status -a user-service
-flyctl status -a order-service
+flyctl status -a order-processing-service
 ```
 
 2. Check if the files are in the volume:
@@ -53,7 +53,7 @@ flyctl status -a order-service
 fly ssh console -a product-service -C "ls -la /data/static/images"
 fly ssh console -a product-service -C "ls -la /data"
 fly ssh console -a user-service -C "ls -la /data"
-fly ssh console -a order-service -C "ls -la /data"
+fly ssh console -a order-processing-service -C "ls -la /data"
 ```
 
 3. Upload images:
@@ -70,7 +70,7 @@ python update_image_metadata.py image_metadata.json
 ```bash
 flyctl ssh console -a product-service -C "python /app/init_sqlite_db.py --db-path /data/product_service.db"
 flyctl ssh console -a user-service -C "python /app/init_sqlite_db.py --db-path /data/user_service.db"
-flyctl ssh console -a order-service -C "python /app/init_sqlite_db.py --db-path /data/order_service.db"
+flyctl ssh console -a order-processing-service -C "python /app/init_sqlite_db.py --db-path /data/order_processing_service.db"
 ```
 
 ### Monitoring and Debugging
@@ -81,7 +81,7 @@ flyctl logs
 # Access the SQLite database console
 fly ssh console -a product-service -C "sqlite3 /data/product_service.db"
 fly ssh console -a user-service -C "sqlite3 /data/user_service.db"
-fly ssh console -a order-service -C "sqlite3 /data/order_service.db"
+fly ssh console -a order-processing-service -C "sqlite3 /data/order_processing_service.db"
 
 # Common SQLite commands in the console:
 # .tables             - Show all tables

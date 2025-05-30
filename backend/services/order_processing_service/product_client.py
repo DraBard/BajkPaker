@@ -7,10 +7,14 @@ from typing import Optional, Dict, Any, List
 logger = logging.getLogger(__name__)
 
 # Environment variables
-mode= os.getenv("mode", "production").lower()
+mode = os.getenv("mode", "production").lower()
 PRODUCT_SERVICE_URL = os.getenv(
     "PRODUCT_SERVICE_URL",
-    "http://localhost:8001" if mode == "development" else "https://product-service.fly.dev"
+    (
+        "http://localhost:8001"
+        if mode == "development"
+        else "https://product-service.fly.dev"
+    ),
 )
 
 
@@ -34,7 +38,9 @@ class ProductServiceClient:
         for attempt in range(max_retries + 1):
             try:
                 async with httpx.AsyncClient(timeout=10.0) as client:
-                    logger.info(f"Attempt {attempt + 1}/{max_retries + 1}: Requesting bike {bike_id} from {self.base_url}/api/bikes/{bike_id}")
+                    logger.info(
+                        f"Attempt {attempt + 1}/{max_retries + 1}: Requesting bike {bike_id} from {self.base_url}/api/bikes/{bike_id}"
+                    )
                     response = await client.get(f"{self.base_url}/api/bikes/{bike_id}")
                     response.raise_for_status()
                     logger.info(f"Successfully retrieved bike {bike_id}")
@@ -48,7 +54,7 @@ class ProductServiceClient:
                     return None
                 # Retry on other errors
                 if attempt < max_retries:
-                    wait_time = retry_delay * (2 ** attempt)
+                    wait_time = retry_delay * (2**attempt)
                     logger.warning(f"Will retry in {wait_time} seconds...")
                     await asyncio.sleep(wait_time)
                 else:
@@ -57,7 +63,7 @@ class ProductServiceClient:
             except Exception as e:
                 logger.error(f"Error retrieving bike {bike_id}: {str(e)}")
                 if attempt < max_retries:
-                    wait_time = retry_delay * (2 ** attempt)
+                    wait_time = retry_delay * (2**attempt)
                     logger.warning(f"Will retry in {wait_time} seconds...")
                     await asyncio.sleep(wait_time)
                 else:

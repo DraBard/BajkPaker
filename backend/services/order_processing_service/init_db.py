@@ -14,7 +14,9 @@ if ENVIRONMENT == "production":
     DB_PATH = "/data/order_processing_service.db"
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 else:
-    DB_PATH = os.path.join(Path(__file__).parent.absolute(), "order_processing_service.db")
+    DB_PATH = os.path.join(
+        Path(__file__).parent.absolute(), "order_processing_service.db"
+    )
 
 # Build the SQLite database URL
 DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"
@@ -31,7 +33,7 @@ async def init_db():
     # Create all tables and handle migrations
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        
+
         # Add customer_info column if it doesn't exist (migration)
         try:
             pragma = await conn.execute(text("PRAGMA table_info('orders')"))

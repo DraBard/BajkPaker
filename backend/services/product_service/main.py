@@ -59,9 +59,11 @@ app.add_middleware(
 )
 logger.info(f"CORS configured with origins: {origins}")
 
+
 @app.head("/", include_in_schema=False)
 async def head_root():
     return Response(status_code=200)
+
 
 # Add middleware to log request/response info for debugging
 @app.middleware("http")

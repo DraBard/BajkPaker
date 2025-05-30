@@ -41,9 +41,11 @@ logger.info(f"CORS configured with origins: {origins}")
 # Include routers
 app.include_router(router)
 
+
 @app.head("/", include_in_schema=False)
 async def head_root():
     return Response(status_code=200)
+
 
 # Initialize database on startup in production
 @app.on_event("startup")
@@ -51,10 +53,12 @@ async def startup_event():
     if os.getenv("ENVIRONMENT") == "production":
         try:
             from init_db import init_db
+
             await init_db()
             logger.info("Database initialized successfully on startup")
         except Exception as e:
             logger.error(f"Failed to initialize database: {e}")
+
 
 # Add a debugging middleware to log all requests
 @app.middleware("http")
@@ -67,9 +71,11 @@ async def log_requests(request: Request, call_next):
     logger.info(f"Response status: {response.status_code}")
     return response
 
+
 @app.get("/healthz")
 async def health_check():
     return {"status": "healthy"}
+
 
 # Add an explicit handler for /api preflight OPTIONS requests
 @app.options("/api")
@@ -81,8 +87,9 @@ async def options_api_root():
             "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
             "Access-Control-Allow-Headers": "*",
             "Access-Control-Max-Age": "86400",
-        }
+        },
     )
+
 
 # Explicitly handle OPTIONS requests at the root level
 @app.options("/{rest_of_path:path}")
@@ -95,8 +102,9 @@ async def options_handler(request: Request, rest_of_path: str):
             "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
             "Access-Control-Allow-Headers": "*",
             "Access-Control-Max-Age": "86400",
-        }
+        },
     )
+
 
 if __name__ == "__main__":
     import uvicorn

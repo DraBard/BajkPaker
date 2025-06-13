@@ -12,7 +12,14 @@ from sib_api_v3_sdk.models import SendSmtpEmail
 
 from database import get_db
 from models import Order, OrderItem, CartItem, Bike
-from schemas import OrderCreate, OrderOut, CartItemCreate, CartItemOut, OrderStatus, CustomBikeOrder
+from schemas import (
+    OrderCreate,
+    OrderOut,
+    CartItemCreate,
+    CartItemOut,
+    OrderStatus,
+    CustomBikeOrder,
+)
 from product_client import ProductServiceClient
 
 logger = logging.getLogger(__name__)
@@ -370,9 +377,11 @@ async def create_custom_bike_order(custom_order: CustomBikeOrder):
     success = send_custom_bike_notification(custom_order)
 
     if success:
-        return {"message": "Custom bike order received successfully. We'll contact you soon."}
+        return {
+            "message": "Custom bike order received successfully. We'll contact you soon."
+        }
     else:
         raise HTTPException(
             status_code=500,
-            detail="Failed to process your custom bike order. Please try again or contact us directly."
+            detail="Failed to process your custom bike order. Please try again or contact us directly.",
         )

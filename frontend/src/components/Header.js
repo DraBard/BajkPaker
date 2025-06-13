@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaShoppingCart, FaHome, FaStore, FaInfoCircle, FaEnvelope, FaRecycle, FaUserPlus, FaBars, FaTimes } from 'react-icons/fa';
+import { FaShoppingCart, FaHome, FaStore, FaInfoCircle, FaEnvelope, FaRecycle, FaUserPlus, FaBars, FaTimes, FaTools } from 'react-icons/fa';
 import { CartContext } from '../CartContext';
 
 const NavBar = styled.nav`
@@ -205,6 +205,9 @@ const Header = () => {
           </NavLink>
           <NavLink to="/revived" isActive={isActive('/revived')} onClick={() => setIsMenuOpen(false)}>
             <FaRecycle />Wskrzeszone
+          </NavLink>
+          <NavLink to="/custom-bike" isActive={isActive('/custom-bike')} onClick={() => setIsMenuOpen(false)}>
+            <FaTools />Twój Projekt
           </NavLink>
           <NavLink to="/about" isActive={isActive('/about')} onClick={() => setIsMenuOpen(false)}>
             <FaInfoCircle />O nas

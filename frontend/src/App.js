@@ -11,6 +11,7 @@ import BikePage from './components/BikePage';
 import CartPage from './components/CartPage';
 import RevivedPage from './components/RevivedPage';
 import RevivedDetailsPage from './components/RevivedDetailsPage';
+import CustomBikePage from './components/CustomBikePage';
 import UserAuthPage from './components/UserAuthPage';
 import GlobalStyle from './styles/GlobalStyle';
 import theme from './styles/theme';
@@ -33,6 +34,7 @@ function App() {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/revived" element={<RevivedPage />} />
             <Route path="/revived/:id" element={<RevivedDetailsPage />} />
+            <Route path="/custom-bike" element={<CustomBikePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/auth" element={<UserAuthPage />} />

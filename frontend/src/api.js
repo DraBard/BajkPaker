@@ -195,3 +195,15 @@ export const uploadBikeImage = async (bikeId, imageFile, isMain = false) => {
   return response.data;
 };
 
+export const submitCustomBikeOrder = async (customBikeData) => {
+  const url = `${ORDER_API_URL}/custom-bikes`;
+  logRequest(url, 'POST', customBikeData);
+  const response = await axios.post(url, customBikeData, { 
+    withCredentials: true,
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  });
+  return response.data;
+};
+

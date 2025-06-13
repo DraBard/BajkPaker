@@ -72,3 +72,17 @@ class OrderOut(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class BikeDetails(BaseModel):
+    frameType: str
+    frameSize: Optional[str] = None
+    color: Optional[str] = None
+    components: Optional[str] = None
+    budget: Optional[str] = None
+    additionalInfo: Optional[str] = None
+
+
+class CustomBikeOrder(BaseModel):
+    customer: CustomerInfo
+    bikeDetails: BikeDetails

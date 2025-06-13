@@ -12,7 +12,7 @@ from sib_api_v3_sdk.models import SendSmtpEmail
 
 from database import get_db
 from models import Order, OrderItem, CartItem, Bike
-from schemas import OrderCreate, OrderOut, CartItemCreate, CartItemOut, OrderStatus
+from schemas import OrderCreate, OrderOut, CartItemCreate, CartItemOut, OrderStatus, CustomBikeOrder
 from product_client import ProductServiceClient
 
 logger = logging.getLogger(__name__)
@@ -292,3 +292,87 @@ async def list_orders(db: AsyncSession = Depends(get_db)):
     )
     orders = result.scalars().all()
     return orders
+
+
+def send_custom_bike_notification(custom_order):
+    """Send notification email for custom bike order"""
+    configuration = sib_api_v3_sdk.Configuration()
+    configuration.api_key["api-key"] = BREVO_API_KEY
+    api_client = sib_api_v3_sdk.ApiClient(configuration)
+    api_instance = transactional_emails_api.TransactionalEmailsApi(api_client)
+
+    customer = custom_order.customer
+    bike_details = custom_order.bikeDetails
+
+    # Prepare HTML content for email
+    html_content = f"""
+    <h3>Nowe zamówienie na projekt indywidualnego roweru miejskiego</h3>
+
+    <h4>Dane klienta:</h4>
+    <p>
+    Imię i nazwisko: {customer.name}<br>
+    Email: {customer.email}<br>
+    Telefon: {customer.phone}
+    </p>
+
+    <h4>Dodatkowe informacje o projekcie roweru:</h4>
+    <p>{bike_details.additionalInfo or 'Klient nie podał dodatkowych informacji'}</p>
+    """
+
+    # Send notification to shop owner
+    internal_email = SendSmtpEmail(
+        sender={"name": BREVO_SENDER_NAME, "email": BREVO_SENDER_EMAIL},
+        to=[{"email": NOTIFICATION_EMAIL}],
+        subject="Nowe zamówienie na projekt indywidualnego roweru miejskiego",
+        html_content=html_content,
+    )
+
+    # Send confirmation to customer
+    customer_email = SendSmtpEmail(
+        sender={"name": BREVO_SENDER_NAME, "email": BREVO_SENDER_EMAIL},
+        to=[{"email": customer.email}],
+        subject="Potwierdzenie otrzymania zapytania o indywidualny projekt roweru",
+        html_content=f"""
+        <h3>Dziękujemy za Twoje zapytanie!</h3>
+        
+        <p>Otrzymaliśmy Twoje zapytanie dotyczące indywidualnego projektu roweru miejskiego. Skontaktujemy się z Tobą wkrótce, aby omówić szczegóły.</p>
+        
+        <p><strong>O naszych rowerach:</strong><br>
+        W BajkPaker tworzymy wyjątkowe rowery miejskie, wykorzystując odrestaurowane ramy ze starych rowerów. Części, które uznamy za sprawne, również przechodzą proces renowacji, a pozostałe elementy wymieniamy na nowe. Każdy rower otrzymuje unikalny motyw według Twojego wyboru - czy to inspirowany winem, grzybobraniem, stylem militarnym, światem fantasy czy czymkolwiek innym!</p>
+        
+        <p>Twoje dane kontaktowe:</p>
+        <p>
+        Imię i nazwisko: {customer.name}<br>
+        Telefon: {customer.phone}
+        </p>
+        
+        <p>Pozdrawiamy,<br>Zespół BajkPaker</p>
+        """,
+    )
+
+    try:
+        # Send emails
+        api_instance.send_transac_email(internal_email)
+        api_instance.send_transac_email(customer_email)
+        logger.info(f"Custom bike order notification sent for {customer.email}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send custom bike order notification: {e}")
+        return False
+
+
+@router.post("/api/custom-bikes")
+async def create_custom_bike_order(custom_order: CustomBikeOrder):
+    """Process custom bike order and send notification emails"""
+    logger.info(f"Received custom bike order from {custom_order.customer.name}")
+
+    # Send notifications
+    success = send_custom_bike_notification(custom_order)
+
+    if success:
+        return {"message": "Custom bike order received successfully. We'll contact you soon."}
+    else:
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to process your custom bike order. Please try again or contact us directly."
+        )

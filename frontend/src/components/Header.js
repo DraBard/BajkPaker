@@ -33,7 +33,7 @@ const Logo = styled(Link)`
   }
 
   ${props => props.theme.mediaQueries.mobile} {
-    font-size: ${props => props.theme.typography.mobileSizes.xlarge};
+    font-size: 2.2rem; /* Further increased size for better visibility on mobile */
     z-index: 1001; // Ensure logo stays above the menu
   }
 `;
@@ -137,6 +137,8 @@ const HamburgerButton = styled.button`
   
   ${props => props.theme.mediaQueries.touch} {
     display: block;
+    font-size: 3rem; /* Increased from 2rem for better visibility */
+    padding: 15px; /* Increased from 10px for larger touch target */
   }
 `;
 

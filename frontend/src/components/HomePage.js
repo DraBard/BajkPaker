@@ -13,8 +13,8 @@ const HomeContainer = styled.div`
 
 const HomePage = () => (
   <HomeContainer>
-    <h1>Welcome to BajkPaker</h1>
-    <p>Your one-stop shop for custom bikes and accessories.</p>
+    <h1>Witaj w BajkPakerze</h1>
+    <p>Rowery rzemieślnicze pod projekt własny</p>
   </HomeContainer>
 );
 

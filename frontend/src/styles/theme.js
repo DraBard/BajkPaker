@@ -8,7 +8,8 @@ const theme = {
     background: '#F5F6FA',
     text: '#2D3436',
     error: '#FF7675',
-    success: '#00B894'
+    success: '#00B894',
+    hamburger: '#333333'
   },
   spacing: {
     small: '0.5rem',
@@ -25,6 +26,13 @@ const theme = {
       large: '1.25rem',
       xlarge: '1.5rem',
       xxlarge: '2rem'
+    },
+    mobileSizes: {
+      small: '0.75rem',
+      medium: '0.9rem',
+      large: '1.125rem',
+      xlarge: '1.35rem',
+      xxlarge: '1.75rem'
     }
   },
   borderRadius: '8px',
@@ -39,6 +47,12 @@ const theme = {
     tablet: '768px',
     desktop: '1024px',
     wide: '1280px'
+  },
+  mediaQueries: {
+    mobile: '@media (max-width: 767px)',
+    tablet: '@media (min-width: 768px) and (max-width: 1023px)',
+    desktop: '@media (min-width: 1024px)',
+    touch: '@media (max-width: 1023px)'
   }
 };
 

@@ -9,6 +9,11 @@ const FooterContainer = styled.footer`
   position: fixed;
   bottom: 0;
   width: 100%;
+  z-index: 10;
+
+  ${props => props.theme.mediaQueries.mobile} {
+    padding: 15px 10px;
+  }
 `;
 
 const TermsLink = styled.span`
@@ -16,6 +21,12 @@ const TermsLink = styled.span`
   text-decoration: underline;
   cursor: pointer;
   margin-left: 10px;
+
+  ${props => props.theme.mediaQueries.mobile} {
+    display: block;
+    margin-top: 5px;
+    margin-left: 0;
+  }
 `;
 
 const Footer = ({ onOpenTerms }) => (
